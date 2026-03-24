@@ -44,17 +44,25 @@ footer: context [
 #pagebreak()
 
 = Opis problemu
+
 = Część teoretyczna
+#cite(<specht1990pnn>)
+
 == Model neuronu
 == Opis matematyczny sztucznego neuronu
 == Sieci neuronowe jednokierunkowe wielowarstwowe
 == Algorytm wstecznej propagacji błędu z przyśpieszeniem metodą adaptacyjnego współczynnika uczenia
 == Metoda momentum
+
 = Analiza danych
+
 = Skrypt programu
+
 = Eksperymenty
 == Wyznaczenie optymalnych wartości K1 oraz K2
 == Wyznaczenie optymalnych wartości lr_inc i lr_dec
 == Eksperyment dla najlepszych wartości er oraz mc
+
 = Podsumowanie i wnioski
-= Bibliografia
+
+#bibliography("bibliography.bib")
