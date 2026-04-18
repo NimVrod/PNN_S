@@ -1,7 +1,6 @@
-from typing import Callable, Optional
-
+from typing import Callable
 import numpy as np
-
+from src.kernels import PnnKernels
 
 class PNN:
     """
@@ -9,7 +8,7 @@ class PNN:
     Train with fit() method and predict with predict() method. Uses a kernel function to compute similarity between input and training patterns.
     """
 
-    def __init__(self, kernel: Optional[Callable[[np.ndarray, np.ndarray, float], float]] = None, sigma=0.1) -> None:
+    def __init__(self, kernel: Callable[[np.ndarray, np.ndarray, float], np.ndarray] = PnnKernels.gaussian_kernel, sigma=0.1) -> None:
         """
         Initialize the PNN model with an optional kernel function and sigma parameter.
         :param kernel: The kernel function to use to compute similarity between input and training patterns. Default is the Gaussian kernel.
@@ -17,27 +16,31 @@ class PNN:
         """
         self.patterns = None
         self.sigma: float = sigma
-        self.kernel = kernel if kernel is not None else self.gaussian_kernel
-
-    @staticmethod
-    def gaussian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> float:
-        """
-        Gaussian kernel function to compute similarity between two vectors.
-        :param x: Vector representing the input pattern.
-        :param y: Vector representing the output pattern.
-        :param sigma: The sigma parameter for the kernel function.
-        :return: The similarity score between the two vectors.
-        """
-        return np.exp(-np.linalg.norm(x - y) ** 2 / (2 * sigma ** 2))
+        self.kernel = kernel
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """
-        Fit the PNN model to the training data by storing the patterns for each class.
+        Fit (Train) the PNN model to the training data by storing the patterns for each class.
         :param x: Training data features
         :param y: Training data labels corresponding to the features in x.
         :return: None
         """
         self.patterns = {c: x[y == c] for c in np.unique(y)}
+
+    def predict_probability(self, x: np.ndarray) -> np.ndarray:
+        """
+        Predict the class probabilities for a set of input vectors.
+        :param x: Array of input vectors to predict class probabilities for.
+        :return: Array of predicted class probabilities corresponding to the input vectors.
+        """
+        if self.patterns is None:
+            raise ValueError("Model has not been fitted yet.")
+        probabilities = np.zeros((x.shape[0], len(self.patterns)))
+        for i, cls in enumerate(self.patterns.keys()):
+            patterns = self.patterns[cls]
+            probabilities[:, i] = np.sum(self.kernel(x, patterns, self.sigma))
+        probabilities /= np.sum(probabilities, axis=1, keepdims=True)
+        return probabilities
 
     def predict_single(self, x: np.ndarray) -> float:
         """
@@ -49,11 +52,11 @@ class PNN:
             raise ValueError("Model has not been fitted yet.")
         best_class = None
         best_score = -np.inf
-        for c, patterns in self.patterns.items():
-            score = sum(self.kernel(x, p, self.sigma) for p in patterns)
+        for cls, patterns in self.patterns.items():
+            score = np.sum(self.kernel(x, patterns, self.sigma))
             if score > best_score:
                 best_score = score
-                best_class = c
+                best_class = cls
 
         return best_class
 
@@ -64,6 +67,3 @@ class PNN:
         :return: Array of predicted class labels corresponding to the input vectors.
         """
         return np.array([self.predict_single(xi) for xi in x])
-
-
-pnn = PNN(kernel=PNN.gaussian_kernel)
