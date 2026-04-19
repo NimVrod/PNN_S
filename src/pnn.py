@@ -35,12 +35,12 @@ class PNN:
         """
         if self.patterns is None:
             raise ValueError("Model has not been fitted yet.")
-        probabilities = np.zeros((x.shape[0], len(self.patterns)))
-        for i, cls in enumerate(self.patterns.keys()):
-            patterns = self.patterns[cls]
-            probabilities[:, i] = np.sum(self.kernel(x, patterns, self.sigma))
-        probabilities /= np.sum(probabilities, axis=1, keepdims=True)
-        return probabilities
+        probablities = np.zeros((x.shape[0], len(self.patterns)))
+        for cls, patterns in self.patterns.items():
+            score = np.sum(self.kernel(x, patterns, self.sigma))
+            probablities[:, cls] = score
+        return probablities / np.sum(probablities, axis=1, keepdims=True)
+
 
     def predict_single(self, x: np.ndarray) -> float:
         """

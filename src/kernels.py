@@ -74,18 +74,18 @@ class PnnKernels:
 
         sq_dist = np.sum((x - y) ** 2, axis=1)
         return np.maximum(0.0, 1.0 - sq_dist / (h ** 2))
-
+    
     @staticmethod
-    def cosine_kernel(x: np.ndarray, y: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    def triangular_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
         """
-        Cosine similarity kernel: (x · y) / (||x|| * ||y|| + eps).
+        Triangular kernel: max(0, 1 - ||x - y|| / h).
         :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
         :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param eps: Numerical stability constant.
-        :return: Similarity scores, shape (n_samples,).\
+        :param h: Bandwidth parameter (must be > 0).
+        :return: Similarity scores, shape (n_samples,).
         """
+        if h <= 0:
+            raise ValueError("h must be > 0")
 
-        dot = np.sum(x * y, axis=1)
-        x_norm = np.linalg.norm(x, axis=1)
-        y_norm = np.linalg.norm(y, axis=1)
-        return dot / (x_norm * y_norm + eps)
+        l2_dist = np.linalg.norm(x - y, axis=1)
+        return np.maximum(0.0, 1.0 - l2_dist / h)

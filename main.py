@@ -11,9 +11,9 @@ def load_data(path : str) -> tuple[np.ndarray, np.ndarray]:
     :return: A tuple containing the features (X) and labels (y) as numpy arrays.
     """
     data = np.loadtxt(path, delimiter=',')
-    X = data[:, :-1]  # All columns except the last one are features
+    x = data[:, :-1]  # All columns except the last one are features
     y = data[:, -1]   # The last column is the class label
-    return X, y
+    return x, y
 
 
 def normalize_data(X: np.ndarray) -> np.ndarray:
@@ -28,22 +28,22 @@ def normalize_data(X: np.ndarray) -> np.ndarray:
 
 
 def main():
-    p = PNN(sigma=0.02, kernel=PnnKernels.cauchy_kernel)
+    p = PNN(sigma=0.02)
     data = load_data("spambase.data")
 
     #Split into training (80%) and testing (20%) sets
-    np.random.seed(42)  # For reproducibility
+    np.random.seed(67)  # For reproducibility
     indices = np.random.permutation(data[0].shape[0])
     train_size = int(0.8 * data[0].shape[0])
     train_indices = indices[:train_size]
     test_indices = indices[train_size:]
 
     normalized_x = normalize_data(data[0])
-    normalized_y = normalize_data(data[1])
+    y = data[1]
 
 
-    x_train, y_train = normalized_x[train_indices], normalized_y[train_indices]
-    x_test, y_test = normalized_x[test_indices], normalized_y[test_indices]
+    x_train, y_train = normalized_x[train_indices], y[train_indices]
+    x_test, y_test = normalized_x[test_indices], y[test_indices]
 
 
     p.fit(x_train, y_train)
@@ -56,7 +56,7 @@ def main():
     # Best sigma and kernel search
     sigma = 0.001
     accuracies: dict[str, dict[float, np.floating]] = {} # {kernel_name: {sigma_value: accuracy_value}}
-    kerns = [PnnKernels.gaussian_kernel, PnnKernels.laplacian_kernel, PnnKernels.cauchy_kernel, PnnKernels.inverse_multiquadric_kernel]
+    kerns = [PnnKernels.gaussian_kernel, PnnKernels.laplacian_kernel, PnnKernels.cauchy_kernel, PnnKernels.inverse_multiquadric_kernel, PnnKernels.epanechnikov_kernel, PnnKernels.triangular_kernel]
     for kernel in kerns:
         p.kernel = kernel
         accuracies.setdefault(f"{kernel.__name__}", {})
