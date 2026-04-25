@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 import numpy as np
 from src.kernels import PnnKernels
 
@@ -14,7 +14,7 @@ class PNN:
         :param kernel: The kernel function to use to compute similarity between input and training patterns. Default is the Gaussian kernel.
         :param sigma: The sigma parameter for the kernel function (default is 0.1).
         """
-        self.patterns = None
+        self.patterns : Optional[dict] = None
         self.sigma: float = sigma
         self.kernel = kernel
 
@@ -42,7 +42,7 @@ class PNN:
         return probablities / np.sum(probablities, axis=1, keepdims=True)
 
 
-    def predict_single(self, x: np.ndarray) -> float:
+    def predict_single(self, x: np.ndarray) -> Optional[float]:
         """
         Predict the class label for a single input
         :param x: Input vector
@@ -50,7 +50,7 @@ class PNN:
         """
         if self.patterns is None:
             raise ValueError("Model has not been fitted yet.")
-        best_class = None
+        best_class : Optional[float] = None
         best_score = -np.inf
         for cls, patterns in self.patterns.items():
             score = np.sum(self.kernel(x, patterns, self.sigma))

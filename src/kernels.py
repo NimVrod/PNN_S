@@ -3,7 +3,7 @@
 
 class PnnKernels:
     @staticmethod
-    def gaussian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> float:
+    def gaussian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
         """
         Gaussian kernel function to compute similarity between two vectors.
         :param x: Vector representing the input pattern.
@@ -89,3 +89,18 @@ class PnnKernels:
 
         l2_dist = np.linalg.norm(x - y, axis=1)
         return np.maximum(0.0, 1.0 - l2_dist / h)
+    
+    @staticmethod
+    def uniform_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
+        """
+        Uniform kernel: 0.5 * (||x - y|| <= h).
+        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
+        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
+        :param h: Bandwidth parameter (must be > 0).
+        :return: Similarity scores, shape (n_samples,).
+        """
+        if h <= 0:
+            raise ValueError("h must be > 0")
+
+        l2_dist = np.linalg.norm(x - y, axis=1)
+        return 0.5 * (l2_dist <= h).astype(float)
