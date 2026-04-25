@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import math
 
 x = np.linspace(-4, 4, 500)
 sigmas = [0.1, 0.3, 0.5, 1.0]
@@ -22,12 +23,18 @@ kernels = {
     "Odwrotna multikwadratowa\n(Inverse Multiquadric Kernel)": lambda d, s: 1 / np.sqrt(d**2 + s**2),
     "Epanecznikowa\n(Epanechnikov Kernel)":          epanechnikov,
     "Trójkątna\n(Triangular Kernel)":               triangular,
+    "Jednostajna\n(Uniform Kernel)":                lambda d, s: np.where(np.abs(d) <= s, 0.5, 0.0)
 }
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+num_kernels = len(kernels)
+ncols = 3
+nrows = math.ceil(num_kernels / ncols)
+fig, axes = plt.subplots(nrows, ncols, figsize=(15, 4 * nrows))
 fig.patch.set_facecolor("#f8fafc")
 
-for ax, (title, fn) in zip(axes.flat, kernels.items()):
+axes_flat = np.atleast_1d(axes).ravel()
+
+for ax, (title, fn) in zip(axes_flat, kernels.items()):
     ax.set_facecolor("#ffffff")
     for s, c, lbl in zip(sigmas, colors, labels):
         y = fn(x, s)
@@ -44,9 +51,13 @@ for ax, (title, fn) in zip(axes.flat, kernels.items()):
     ax.set_ylim(bottom=0)
     ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 
-fig.suptitle("Porównanie funkcji jądra dla różnych wartości " + r"$\sigma$",
-             fontsize=13, fontweight="bold", color="#0f172a", y=1.01)
+for ax in axes_flat[num_kernels:]:
+    ax.set_visible(False)
 
-plt.tight_layout()
+fig.suptitle("Porównanie funkcji jądra dla różnych wartości " + r"$\sigma$",
+             fontsize=13, fontweight="bold", color="#0f172a", y=0.99)
+
+# Keep room for the suptitle so it is not clipped at the top.
+plt.tight_layout(rect=(0, 0, 1, 0.96))
 plt.show()
 print("OK")
