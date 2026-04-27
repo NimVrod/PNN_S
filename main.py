@@ -46,7 +46,7 @@ def main():
         PnnKernels.triangular_kernel,
         PnnKernels.uniform_kernel,
     ]
-    silverman_accuracy: dict[str, float] = {}
+    silverman_accuracy: dict[str, float] = {} # {kernel_name: accuracy} for Silverman's rule of thumb evaluation
     kf = KFold(n_splits=5, shuffle=True, random_state=67)
     for train_index, test_index in kf.split(x):
         x_train, x_test = x[train_index], x[test_index]
@@ -61,27 +61,24 @@ def main():
     for kernel_name, acc in silverman_accuracy.items():
         print(f"Kernel: {kernel_name}, Accuracy: {acc:.4f}")
     # Best sigma and kernel search using K-Fold Cross-Validation
-    accuracies = kFold_search(x, y, diff_sigma=0.05, kerns=kerns)
+    accuracies = kFold_search(x, y, kerns=kerns)
 
-    # Find the best kernel and sigma based on average accuracy in (min, max, avg)
+    # Find best kernel/sigma by mean fold accuracy
     best_kernel, best_sigma, best_stats = max(
         (
-            (k, sigma, stats)
-            for k, v in accuracies.items()
-            if v
-            for sigma, stats in v.items()
+            (kernel_name, sigma, stats)
+            for kernel_name, accs in accuracies.items()
+            for sigma, stats in accs.items()
         ),
-        default=(None, None, (0.0, 0.0, -1.0)),
-        key=lambda t: t[2][2],
+        key=lambda item: np.mean(item[2]),
     )
-    if best_kernel is not None:
-        best_min, best_max, best_avg = best_stats
-        print(
-            f"Best configuration: {best_kernel}, sigma {best_sigma:.3f} "
-            f"with avg {best_avg:.4f} (min {best_min:.4f}, max {best_max:.4f})"
-        )
-    else:
-        print("No configurations evaluated.")
+
+    print(
+        f"Best configuration: Kernel: {best_kernel}, "
+        f"Sigma: {best_sigma:.3f}, Average Accuracy: {np.mean(best_stats):.4f}"
+    )
+
+    save_results(accuracies, filename="results.csv")
 
     # Visualize kernel and sigma experiments: avg line with min/max as error bars
     plt.figure(figsize=(10, 6))
@@ -91,10 +88,12 @@ def main():
 
         sigmas = np.array(sorted(accs.keys()))
         stats = np.array([accs[s] for s in sigmas], dtype=float)
-        avgs = stats[:, 2]
+        avgs = np.mean(stats, axis=1)
+        mins = np.min(stats, axis=1)
+        maxs = np.max(stats, axis=1)
 
         plt.plot(sigmas, avgs, label=kernel_name)
-        plt.fill_between(sigmas, stats[:, 0], stats[:, 1], alpha=0.2)
+        #plt.fill_between(sigmas, mins, maxs, alpha=0.2)
 
     plt.xlabel("Sigma")
     plt.ylabel("Accuracy")
@@ -105,22 +104,18 @@ def main():
     plt.show()
 
 
+
 def kFold_search(
     x: np.ndarray,
     y: np.ndarray,
     min_sigma=0.001,
     max_sigma=2,
     diff_sigma=0.005,
+    splits=5,
     kerns=[
-        PnnKernels.gaussian_kernel,
-        PnnKernels.laplacian_kernel,
-        PnnKernels.cauchy_kernel,
-        PnnKernels.inverse_multiquadric_kernel,
-        PnnKernels.epanechnikov_kernel,
-        PnnKernels.triangular_kernel,
-        PnnKernels.uniform_kernel,
+        PnnKernels.gaussian_kernel
     ],
-) -> dict[str, dict[float, tuple[np.floating, np.floating, np.floating]]]:
+) -> dict[str, dict[float, np.ndarray]]:
     """
     Perform k-fold cross-validation to search for the best sigma and kernel configuration.
     :param x: The input feature matrix.
@@ -131,10 +126,10 @@ def kFold_search(
     :return: A dictionary containing the accuracies for each kernel and sigma combination.
     """
     accuracies: dict[
-        str, dict[float, tuple[np.floating, np.floating, np.floating]]
+        str, dict[float, np.ndarray]
     ] = {}  # {kernel_name: {sigma_value: (min_acc, max_acc, avg_acc)}}
 
-    kf = KFold(n_splits=5, shuffle=True, random_state=67)
+    kf = KFold(n_splits=splits, shuffle=True, random_state=67)
     p = PNN()
     for kernel in kerns:
         kernel_name = kernel.__name__
@@ -150,14 +145,26 @@ def kFold_search(
                 y_pred = np.array([p.predict_single(x) for x in x_test])
                 fold_accuracy = np.mean(y_pred == y_test)
                 fold_accuracies.append(fold_accuracy)
-            avg_accuracy = np.mean(fold_accuracies)
-            min_accuracy = np.min(fold_accuracies)
-            max_accuracy = np.max(fold_accuracies)
-            accuracies[kernel_name][sigma] = (min_accuracy, max_accuracy, avg_accuracy)
+            accuracies[kernel_name][sigma] = np.array(fold_accuracies)
             print(
-                f"Kernel: {kernel_name}, Sigma: {sigma:.3f}, Accuracy: {avg_accuracy:.4f} (min: {min_accuracy:.4f}, max: {max_accuracy:.4f})"
+                f"Kernel: {kernel_name}, Sigma: {sigma:.3f}, Accuracy: {np.mean(accuracies[kernel_name][sigma]):.4f} (min: {np.min(accuracies[kernel_name][sigma]):.4f}, max: {np.max(accuracies[kernel_name][sigma]):.4f})"
             )
     return accuracies
+
+def save_results(accuracies: dict[str, dict[float, np.ndarray]], filename: str = "results.csv"):
+    """
+    Save the accuracies for each kernel and sigma combination to a CSV file.
+    :param accuracies: A dictionary containing the accuracies for each kernel and sigma combination.
+    :param filename: The name of the CSV file to save the results to.
+    """
+    with open(filename, "w") as f:
+        f.write("Kernel,Sigma,Min Accuracy,Max Accuracy,Average Accuracy\n")
+        for kernel_name, sigma_dict in accuracies.items():
+            for sigma, stats in sigma_dict.items():
+                min_acc = np.min(stats)
+                max_acc = np.max(stats)
+                avg_acc = np.mean(stats)
+                f.write(f"{kernel_name},{sigma:.3f},{min_acc:.4f},{max_acc:.4f},{avg_acc:.4f}\n")
 
 
 if __name__ == "__main__":

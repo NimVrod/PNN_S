@@ -183,7 +183,7 @@ wpływa na estymowaną gęstość w punkcie $bold(x)$ #cite(<silverman1986densit
 Wybór funkcji jądra wpływa na kształt granicy decyzyjnej i odporność modelu na szum.
 Nie ma jednej uniwersalnej funkcji jądra, która byłaby najlepsza dla wszystkich problemów -- dobór powinien być dostosowany do charakterystyki danych #cite(<specht1990pnn>).
 
-W każdej funkcji pomijamy stały czynnik normalizujący, ponieważ jest on identyczny dla wszystkich wzorców, więc nie wpływa on na decyzję klasyfikacyjną. #cite(<PatternClassification>)
+W każdej funkcji pomijamy stały czynnik normalizujący, *ponieważ jest on identyczny dla wszystkich wzorców*, więc nie wpływa on na decyzję klasyfikacyjną. #cite(<PatternClassification>)
 
 === Gaussowska (Gaussian Kernel)
 
@@ -214,7 +214,7 @@ $ K(bold(x), bold(x)_i) = frac(1, sqrt(||bold(x) - bold(x)_i||^2 + sigma^2)) $
 Funkcja zawsze dodatnia o łagodnym zaniku. Stosowana jako alternatywa dla jądra
 gaussowskiego, gdy pożądana jest mniejsza czułość na dokładną wartość $sigma$.
 
-=== Epanecznika (Epanechnikov Kernel)
+=== Epanecznika (Epanechnikov Kernel) #cite(<wikipedia_kernels>)
 $ K(bold(x), bold(x)_i) = max (lr(0, 1 - frac(||bold(x) - bold(x)_i||^2, sigma^2))) $
 Jądro to jest gładkie wewnątrz obszaru wsparcia, ale na jego brzegu ma nieciągłość pochodnej. Z tego powodu dobrze sprawdza się w zadaniach, w których zależy nam na lokalnym uśrednianiu i ograniczeniu wpływu odległych obserwacji. W porównaniu z jądrem gaussowskim daje bardziej „lokalny” charakter estymacji i może lepiej tłumić słabo istotne, odległe wzorce.
 
@@ -227,6 +227,8 @@ Jądro trójkątne jest funkcją liniową, która maleje wraz z odległością, 
 === Jednostkowa (Uniform Kernel)
 $ K(x, x_i) = cases(0.5 "kiedy" ||x - x_i|| <= sigma, 0 "w przeciwnym wypadku") $
 Jądro jednostkowe jest funkcją o stałej wartości wewnątrz obszaru wsparcia i zerowej wartości poza nim. Jest to najprostsze jądro, które uwzględnia tylko obserwacje znajdujące się w promieniu $sigma$ od punktu estymacji, przypisując im jednakową wagę. Ze względu na swoją prostotę, jądro jednostkowe może być mniej skuteczne w zadaniach, gdzie ważne jest uwzględnienie różnic w odległości między obserwacjami a punktem estymacji.
+
+Porównanie kształtu różnych funkcji jądra dla kilku wartości $sigma$ przedstawiono na #ref(<PorownanieJader>).
 
 == Parametr wygładzania $sigma$ <sigma>
 
@@ -253,8 +255,10 @@ Do wyznaczenia optymalnej wartości $sigma$ stosuje się zazwyczaj jedną z poni
   #cite(<hastie2009elements>),
 - *reguła Silvermana* #cite(<silverman1986density>) -- heurystyczny estymator oparty
   na odchyleniu standardowym danych:
-  $sigma^* = 1.06 , hat(s) , N^(-1\/5)$, gdzie $hat(s)$ to odchylenie standardowe
+  $sigma^* = 1.06 * hat(s) * N^(-1\/5)$, gdzie $hat(s)$ <silvermanrule>
+  to odchylenie standardowe
   cech, a $N$ to liczba wzorców,
+
 - *przeszukiwanie siatki* (ang. grid search) -- systematyczne sprawdzenie zbioru
   kandydujących wartości $sigma$ z oceną na zbiorze testowym #cite(<hastie2009elements>).
 
@@ -293,8 +297,6 @@ Jeżeli nie przeprowadzimy normalizacji, odległości euklidesowe obliczane prze
 )
 Po znormalizowaniu danych, każda cecha ma wartość średnią równą $0$ i odchylenie standardowe równe $1$. Dzięki temu PNN może efektywnie obliczać odległości euklidesowe i estymować gęstość prawdopodobieństwa bez dominacji jednej cechy nad innymi.
 
-$80%$ danych jest używane do treningu modelu, a pozostałe $20%$ do testowania jego wydajności. Taki podział pozwala na ocenę zdolności generalizacji modelu na niewidzianych wcześniej danych.
-
 //TODO
 = Skrypt programu
 #figure(
@@ -330,82 +332,69 @@ $80%$ danych jest używane do treningu modelu, a pozostałe $20%$ do testowania 
 )
 
 = Eksperymenty
-W Probablistycznej sieci neuronowej kluczową rolę odgrywa parametr $sigma$ _#ref(<sigma>)_, który kontroluje szerokość funkcji jądra używanej do estymacji gęstości. Różne wartości $sigma$ mogą znacząco wpłynąć na dokładność klasyfikacji, dlatego ważne jest przeprowadzenie eksperymentów w celu znalezienia optymalnej wartości tego parametru.
+W Probablistycznej sieci neuronowej kluczową rolę odgrywa parametr $sigma$ (_#ref(<sigma>)_), który kontroluje szerokość funkcji jądra używanej do estymacji gęstości. Różne wartości $sigma$ mogą znacząco wpłynąć na dokładność klasyfikacji, dlatego ważne jest przeprowadzenie eksperymentów w celu znalezienia optymalnej wartości tego parametru.
 Porównamy również różne funkcje jądra, aby zobaczyć, jak wpływają one na wydajność modelu. (_#ref(<kernel>)_).
 
-//TODO: REMOVE ONE OF THE TWO FIGURES BELOW
-
-Zrobimy to za pomocą następującego skryptu:
 #figure(
   ```py
-    # Best sigma and kernel search
-    sigma = 0.001
-    accuracies: dict[str, dict[float, np.floating]] = {} # {kernel_name: {sigma_value: accuracy_value}}
-    kerns = [PnnKernels.gaussian_kernel, PnnKernels.laplacian_kernel, PnnKernels.cauchy_kernel, PnnKernels.inverse_multiquadric_kernel, PnnKernels.epanechnikov_kernel, PnnKernels.triangular_kernel]
-    for kernel in kerns:
-        p.kernel = kernel
-        accuracies.setdefault(f"{kernel.__name__}", {})
-        while sigma < 1:
-            p.sigma = sigma
-            predictions = p.predict(x_test[:100])
-            accuracy = np.mean(predictions == y_test[:100])
-            print(f"Test Accuracy: {accuracy:.2f}, Sigma: {sigma:.3f}, Kernel: {kernel.__name__}")
-            accuracies[f"{kernel.__name__}"][sigma] = float(accuracy)
-            sigma += 0.005
-        sigma = 0.001
-  ```,
-  caption: [Część skryptu odpowiedzialna za znalezienie najlepszej konfiguracji jądra i $sigma$],
-)
+      def kFold_search(
+      x: np.ndarray,
+      y: np.ndarray,
+      min_sigma=0.001,
+      max_sigma=2,
+      diff_sigma=0.005,
+      splits=5,
+      kerns=[
+          PnnKernels.gaussian_kernel
+      ],
+  ) -> dict[str, dict[float, np.ndarray]]:
+      """
+      Perform k-fold cross-validation to search for the best sigma and kernel configuration.
+      :param x: The input feature matrix.
+      :param y: The target labels.
+      :param min_sigma: The minimum value for sigma.
+      :param max_sigma: The maximum value for sigma.
+      :param diff_sigma: The step size for sigma.
+      :return: A dictionary containing the accuracies for each kernel and sigma combination.
+      """
+      accuracies: dict[
+          str, dict[float, np.ndarray]
+      ] = {}  # {kernel_name: {sigma_value: (min_acc, max_acc, avg_acc)}}
 
-#figure(
-  ```py
-    def kFold_search(x: np.ndarray, y : np.ndarray, min_sigma = 0.001, max_sigma = 2, diff_sigma = 0.005, kerns = [PnnKernels.gaussian_kernel]) -> dict[str, dict[float, tuple[np.floating, np.floating, np.floating]]]:
-    """
-    Perform k-fold cross-validation to search for the best sigma and kernel configuration.
-    :param x: The input feature matrix.
-    :param y: The target labels.
-    :param min_sigma: The minimum value for sigma.
-    :param max_sigma: The maximum value for sigma.
-    :param diff_sigma: The step size for sigma.
-    :return: A dictionary containing the accuracies for each kernel and sigma combination.
-    """
-    accuracies: dict[str, dict[float, tuple[np.floating, np.floating, np.floating]]] = {} # {kernel_name: {sigma_value: (min_acc, max_acc, avg_acc)}}
-
-    kf = KFold(n_splits=5, shuffle=True, random_state=67)
-    p = PNN()
-    for kernel in kerns:
-        kernel_name = kernel.__name__
-        accuracies[kernel_name] = {}
-        for sigma in np.arange(min_sigma, max_sigma + diff_sigma, diff_sigma):
-            p.kernel = kernel
-            p.sigma = sigma
-            fold_accuracies = []
-            for train_index, test_index in kf.split(x):
-                x_train, x_test = x[train_index], x[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                p.fit(x_train, y_train)
-                y_pred = np.array([p.predict_single(x) for x in x_test])
-                fold_accuracy = np.mean(y_pred == y_test)
-                fold_accuracies.append(fold_accuracy)
-            avg_accuracy = np.mean(fold_accuracies)
-            min_accuracy = np.min(fold_accuracies)
-            max_accuracy = np.max(fold_accuracies)
-            accuracies[kernel_name][sigma] = (min_accuracy, max_accuracy, avg_accuracy)
-            print(f"Kernel: {kernel_name}, Sigma: {sigma:.3f}, Accuracy: {avg_accuracy:.4f} (min: {min_accuracy:.4f}, max: {max_accuracy:.4f})")
-    return accuracies
+      kf = KFold(n_splits=splits, shuffle=True, random_state=67)
+      p = PNN()
+      for kernel in kerns:
+          kernel_name = kernel.__name__
+          accuracies[kernel_name] = {}
+          for sigma in np.arange(min_sigma, max_sigma + diff_sigma, diff_sigma):
+              p.kernel = kernel
+              p.sigma = sigma
+              fold_accuracies = []
+              for train_index, test_index in kf.split(x):
+                  x_train, x_test = x[train_index], x[test_index]
+                  y_train, y_test = y[train_index], y[test_index]
+                  p.fit(x_train, y_train)
+                  y_pred = np.array([p.predict_single(x) for x in x_test])
+                  fold_accuracy = np.mean(y_pred == y_test)
+                  fold_accuracies.append(fold_accuracy)
+              accuracies[kernel_name][sigma] = np.array(fold_accuracies)
+              print(
+                  f"Kernel: {kernel_name}, Sigma: {sigma:.3f}, Accuracy: {np.mean(accuracies[kernel_name][sigma]):.4f} (min: {np.min(accuracies[kernel_name][sigma]):.4f}, max: {np.max(accuracies[kernel_name][sigma]):.4f})"
+              )
+      return accuracies
   ```,
   caption: [Część skryptu odpowiedzialna za poszukiwanie najlepszej konfiguracji jądra i $sigma$ z użyciem walidacji krzyżowej (_#ref(<sigmasearch>)_)],
 )
-Korzystamy z z $5$-krotnej walidacji krzyżowej, aby uzyskać bardziej wiarygodne oszacowanie dokładności dla każdej kombinacji jądra i $sigma$. Wyniki są przechowywane w słowniku `accuracies`, który zawiera minimalną, maksymalną i średnią dokładność dla każdej konfiguracji.
+Korzystamy z z $5$-krotnej walidacji krzyżowej, aby uzyskać bardziej wiarygodne oszacowanie dokładności dla każdej kombinacji jądra i $sigma$.
 
 Badamy wartości $sigma$ w zakresie od $0.001$ do $2$ z krokiem $0.005$, co pozwala nam zobaczyć, jak dokładność zmienia się w szerokim zakresie wartości tego parametru.
 
 Po przeprowadzeniu eksperymentów, możemy zwizualizować wyniki na wykresie, który pokazuje dokładność dla różnych konfiguracji jądra i wartości $sigma$.
 #figure(
-  image("Images/kfoldcheck.png", width: 80%),
+  image("Images/pnn2.png", width: 95%),
   caption: [Wykres dokładności dla różnych konfiguracji jądra i wartości sigma],
 )
-Najlepszą dokładność klasyfikacji osiągnięto dla jądra laplasjańskiego przy $sigma = 0.601$, (średnia dokładność $0.9239$ , min: $0.9121$, max: $0.9348$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągneło ono podobne wyniki. Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (_#ref(<PorownanieJader>)_).
+Najlepszą dokładność klasyfikacji osiągnięto dla jądra laplasjańskiego przy $sigma = 0.611$, (średnia dokładność $0.9244$ , min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągneło ono podobne wyniki. Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (_#ref(<PorownanieJader>)_).
 Jądra cauchy'ego i odwrotna multikwadratowa nie są odpowiednie dla tego zbioru danych, ich dokładność nie przekroczyła $0.8$ dla żadnej wartości $sigma$.
 
 Wykorzystaliśmy również regułę Silvermana (_#ref(<sigmasearch>)_) do oszacowania optymalnej wartości $sigma$ na podstawie odchylenia standardowego cech. Dla naszego zbioru danych, reguła Silvermana zasugerowała wartość $sigma^* = 0.1962$, sprawdzając tą wartość z każdym z jąder uzyskaliśmy największą średnią dokładność dla jądra laplasjańskiego ($0.9141$), co jest zgodne z wynikami uzyskanymi podczas eksperymentu z walidacją krzyżową.
@@ -415,6 +404,10 @@ Wykorzystaliśmy również regułę Silvermana (_#ref(<sigmasearch>)_) do oszaco
 W ramach projektu przedstawiono teoretyczne podstawy probabilistycznej sieci neuronowej (PNN), jej architekturę oraz rolę funkcji jądra i parametru $sigma$. Następnie przeprowadzono eksperyment porównujący kilka funkcji jądra dla różnych wartości $sigma$.
 
 Uzyskane wyniki potwierdzają, że skuteczność PNN silnie zależy od doboru hiperparametrów. Najlepszą dokładność klasyfikacji osiągnięto dla jądra laplasjańskiego przy odpowiednio dobranym $sigma$, natomiast pozostałe jądra wykazywały większą wrażliwość lub niższą stabilność wyników.
+
+Reguła Silvermana okazała się użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie mogła być dostrojona za pomocą walidacji krzyżowej, co potwierdziło jej praktyczną wartość w kontekście PNN.
+
+Probabilistyczne sieci neuronowe są skuteczną metodą klasyfikacji, podczas naszych eksperymentów osiągnęły wysoką dokładność porównywalną z innymi metodami klasyfikacji #cite(<spambase>). Mimo bardzo krótkiego czasu uczenia, PNN może być konkurencyjną alternatywą dla bardziej złożonych modeli, zwłaszcza w zadaniach z niewielką ilością danych.
 
 Najważniejsze wnioski:
 - dobór funkcji jądra ma istotny wpływ na jakość klasyfikacji,
