@@ -11,9 +11,13 @@ class PnnKernels:
         :param sigma: The sigma parameter for the kernel function.
         :return: The similarity score between the two vectors.
         """
+        if sigma <= 0:
+            raise ValueError("sigma must be > 0")
+
         diff = x - y
         sq_dist = np.sum(diff ** 2, axis=1)
-        return np.exp(-sq_dist / (2 * sigma ** 2))
+        norm_const = 1.0 / (sigma * np.sqrt(2.0 * np.pi))
+        return norm_const * np.exp(-sq_dist / (2 * sigma ** 2))
 
     @staticmethod
     def laplacian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
@@ -28,7 +32,8 @@ class PnnKernels:
             raise ValueError("sigma must be > 0")
 
         l1_dist = np.sum(np.abs(x - y), axis=1)
-        return np.exp(-l1_dist / sigma)
+        norm_const = 1.0 / (2.0 * sigma)
+        return norm_const * np.exp(-l1_dist / sigma)
 
     @staticmethod
     def cauchy_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
@@ -43,12 +48,13 @@ class PnnKernels:
             raise ValueError("sigma must be > 0")
 
         sq_dist = np.sum((x - y) ** 2, axis=1)
-        return 1.0 / (1.0 + sq_dist / (sigma ** 2))
+        norm_const = 1.0 / (np.pi * sigma)
+        return norm_const / (1.0 + sq_dist / (sigma ** 2))
 
     @staticmethod
     def inverse_multiquadric_kernel(x: np.ndarray, y: np.ndarray, c: float) -> np.ndarray:
         """
-        Inverse multiquadric kernel: 1 / sqrt(||x - y||^2 + c^2).
+        Inverse multiquadric kernel with scale factor: (1 / c) / sqrt(||x - y||^2 + c^2).
         :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
         :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
         :param c: Positive constant controlling smoothness (must be > 0).
@@ -58,7 +64,8 @@ class PnnKernels:
             raise ValueError("c must be > 0")
 
         sq_dist = np.sum((x - y) ** 2, axis=1)
-        return 1.0 / np.sqrt(sq_dist + c ** 2)
+        norm_const = 1.0 / c
+        return norm_const / np.sqrt(sq_dist + c ** 2)
 
     @staticmethod
     def epanechnikov_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
@@ -73,7 +80,8 @@ class PnnKernels:
             raise ValueError("h must be > 0")
 
         sq_dist = np.sum((x - y) ** 2, axis=1)
-        return np.maximum(0.0, 1.0 - sq_dist / (h ** 2))
+        norm_const = 3.0 / (4.0 * h)
+        return norm_const * np.maximum(0.0, 1.0 - sq_dist / (h ** 2))
     
     @staticmethod
     def triangular_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
@@ -88,7 +96,8 @@ class PnnKernels:
             raise ValueError("h must be > 0")
 
         l2_dist = np.linalg.norm(x - y, axis=1)
-        return np.maximum(0.0, 1.0 - l2_dist / h)
+        norm_const = 1.0 / h
+        return norm_const * np.maximum(0.0, 1.0 - l2_dist / h)
     
     @staticmethod
     def uniform_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
@@ -103,4 +112,5 @@ class PnnKernels:
             raise ValueError("h must be > 0")
 
         l2_dist = np.linalg.norm(x - y, axis=1)
-        return 0.5 * (l2_dist <= h).astype(float)
+        norm_const = 1.0 / (2.0 * h)
+        return norm_const * (l2_dist <= h).astype(float)

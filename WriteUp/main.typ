@@ -137,9 +137,9 @@ klasy, a $j$ -- numer wzorca w obrębie tej klasy.
 
 Dla danego wektora wejściowego $bold(x)$ neuron oblicza odległość euklidesową między
 wejściem a zapamiętanym wzorcem, a następnie przetwarza ją przez funkcję jądra
-#cite(<specht1990pnn>). Domyślnie stosuje się wielowymiarowe jądro Gaussa (zob. @kernel):
+#cite(<specht1990pnn>). Domyślnie stosuje się jądro Gaussa (zob. @kernel):
 
-$ phi_(k j)(bold(x)) = exp lr(( -frac(||bold(x) - bold(x)_(k j)||^2, 2 sigma^2) )) $
+$ phi_(k j)(bold(x)) = frac(1, sigma sqrt(2 pi)) exp lr(( -frac(||bold(x) - bold(x)_(k j)||^2, 2 sigma^2) )) $
 
 gdzie:
 - $||bold(x) - bold(x)_(k j)||$ -- odległość euklidesowa w przestrzeni cech (_#ref(<eq_distance>)_),
@@ -183,11 +183,16 @@ wpływa na estymowaną gęstość w punkcie $bold(x)$ #cite(<silverman1986densit
 Wybór funkcji jądra wpływa na kształt granicy decyzyjnej i odporność modelu na szum.
 Nie ma jednej uniwersalnej funkcji jądra, która byłaby najlepsza dla wszystkich problemów -- dobór powinien być dostosowany do charakterystyki danych #cite(<specht1990pnn>).
 
-W każdej funkcji pomijamy stały czynnik normalizujący, *ponieważ jest on identyczny dla wszystkich wzorców*, więc nie wpływa on na decyzję klasyfikacyjną. #cite(<PatternClassification>)
+//TODO: Zapytać czy warto dodać więcej funkcji jądra, np. Sigmoid, Spline, czy Multiquadric
+// TODO: Zapytać czy mogę pozbyć się stałych normalizujących, które nie wpływają na decyzję (argmax) w kontekście klasyfikacji, ale są istotne dla estymacji gęstości
+/*
+W poniższych wzorach uwzględniamy stałe normalizujące zgodne z implementacją, aby otrzymać pełne postaci funkcji jądra użytych w eksperymentach.
+Jeżeli sieć byłaby używana tylko do klasyfikacji, można by pominąć stałe normalizujące, ponieważ nie wpływają one na ostateczną decyzję (argmax), ale w kontekście estymacji gęstości są one istotne dla poprawnej interpretacji wyników. #cite(<PatternClassification>)
+*/
 
 === Gaussowska (Gaussian Kernel)
 
-$ K(bold(x), bold(x)_i) = exp lr(( -frac(||bold(x) - bold(x)_i||^2, 2 sigma^2) )) $
+$ K(bold(x), bold(x)_i) = frac(1, sigma sqrt(2 pi)) exp lr(( -frac(||bold(x) - bold(x)_i||^2, 2 sigma^2) )) $
 
 Najczęściej stosowana funkcja jądra #cite(<specht1990pnn>) #cite(<Kusy2014ProbabilisticNN>). Gładka, różniczkowalna,
 symetrycznie zanika wraz z odległością. Wrażliwa na wartości odstające ze względu
@@ -195,37 +200,37 @@ na szybki zanik gaussowski.
 
 === Laplasjańska (Laplacian Kernel)
 
-$ K(bold(x), bold(x)_i) = exp lr(( -frac(||bold(x) - bold(x)_i||, sigma) )) $
+$ K(bold(x), bold(x)_i) = frac(1, 2 sigma) exp lr(( -frac(||bold(x) - bold(x)_i||, sigma) )) $
 
 Zanika wolniej niż jądro gaussowskie -- jest mniej czułe na wartości odstające
 i lepiej sprawdza się przy danych z rozkładami o grubych ogonach.
 
 === Cauchy'ego (Cauchy Kernel) #cite(<cursedKernels>)
 
-$ K(bold(x), bold(x)_i) = frac(1, 1 + frac(||bold(x) - bold(x)_i||^2, sigma^2)) $
+$ K(bold(x), bold(x)_i) = frac(1, pi sigma) frac(1, 1 + frac(||bold(x) - bold(x)_i||^2, sigma^2)) $
 
 Posiada bardzo grube ogony, przez co silnie uwzględnia odległe wzorce.
 Przydatne przy danych silnie zaszumionych lub heterogenicznych.
 
 === Odwrotna multikwadratowa (Inverse Multiquadric Kernel) #cite(<commonKernels>)
 
-$ K(bold(x), bold(x)_i) = frac(1, sqrt(||bold(x) - bold(x)_i||^2 + sigma^2)) $
+$ K(bold(x), bold(x)_i) = frac(1, sigma) frac(1, sqrt(||bold(x) - bold(x)_i||^2 + sigma^2)) $
 
 Funkcja zawsze dodatnia o łagodnym zaniku. Stosowana jako alternatywa dla jądra
 gaussowskiego, gdy pożądana jest mniejsza czułość na dokładną wartość $sigma$.
 
 === Epanecznika (Epanechnikov Kernel) #cite(<wikipedia_kernels>)
-$ K(bold(x), bold(x)_i) = max (lr(0, 1 - frac(||bold(x) - bold(x)_i||^2, sigma^2))) $
+$ K(bold(x), bold(x)_i) = frac(3, 4 sigma) max (lr(0, 1 - frac(||bold(x) - bold(x)_i||^2, sigma^2))) $
 Jądro to jest gładkie wewnątrz obszaru wsparcia, ale na jego brzegu ma nieciągłość pochodnej. Z tego powodu dobrze sprawdza się w zadaniach, w których zależy nam na lokalnym uśrednianiu i ograniczeniu wpływu odległych obserwacji. W porównaniu z jądrem gaussowskim daje bardziej „lokalny” charakter estymacji i może lepiej tłumić słabo istotne, odległe wzorce.
 
-Używamy funkcji $max$ do zapewnienia, że jądro nie zwróci wartości $< 0$. Ponieważ wartości ujemne nie mają sensu w kontekście estymacji gęstości, funkcja $max$ gwarantuje, że jądro będzie miało wartość zero dla obserwacji znajdujących się poza obszarem wsparcia (gdzie $||bold(x) - bold(x)_i||^2 > sigma^2$).
+Używamy funkcji $max$ do zapewnienia, że jądro nie zwróci wartości ujemnej. Ponieważ wartości ujemne nie mają sensu w kontekście estymacji gęstości, funkcja $max$ gwarantuje, że jądro będzie miało wartość zero dla obserwacji znajdujących się poza obszarem wsparcia (gdzie $||bold(x) - bold(x)_i||^2 > sigma^2$).
 
 === Trójkątna (Triangular Kernel)
-$ K(bold(x), bold(x)_i) = max (lr(0, 1 - frac(||bold(x) - bold(x)_i||, sigma))) $
+$ K(bold(x), bold(x)_i) = frac(1, sigma) max (lr(0, 1 - frac(||bold(x) - bold(x)_i||, sigma))) $
 Jądro trójkątne jest funkcją liniową, która maleje wraz z odległością, osiągając wartość zero w odległości $sigma$. Jest to jądro o ograniczonym zasięgu, które uwzględnia tylko obserwacje znajdujące się w promieniu $sigma$ od punktu estymacji. Dzięki temu jest szczególnie skuteczne w zadaniach, gdzie ważne jest uwzględnienie tylko lokalnych informacji i ograniczenie wpływu odległych obserwacji.
 
 === Jednostkowa (Uniform Kernel)
-$ K(x, x_i) = cases(0.5 "kiedy" ||x - x_i|| <= sigma, 0 "w przeciwnym wypadku") $
+$ K(x, x_i) = cases(frac(1, 2 sigma) "kiedy" ||x - x_i|| <= sigma, 0 "w przeciwnym wypadku") $
 Jądro jednostkowe jest funkcją o stałej wartości wewnątrz obszaru wsparcia i zerowej wartości poza nim. Jest to najprostsze jądro, które uwzględnia tylko obserwacje znajdujące się w promieniu $sigma$ od punktu estymacji, przypisując im jednakową wagę. Ze względu na swoją prostotę, jądro jednostkowe może być mniej skuteczne w zadaniach, gdzie ważne jest uwzględnienie różnic w odległości między obserwacjami a punktem estymacji.
 
 Porównanie kształtu różnych funkcji jądra dla kilku wartości $sigma$ przedstawiono na #ref(<PorownanieJader>).
