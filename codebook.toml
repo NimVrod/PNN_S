@@ -1,0 +1,14 @@
+dictionaries = [
+    "en_us",
+    "en_gb",
+    "pl",
+]
+words = [
+    "hiperparametrów",
+    "laplasjańskiego",
+    "pnn",
+    "probablistycznej",
+    "silvermana",
+    "spambase",
+]
+ignore_patterns = ["<.*?>"]

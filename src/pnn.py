@@ -27,21 +27,6 @@ class PNN:
         """
         self.patterns = {c: x[y == c] for c in np.unique(y)}
 
-    def predict_probability(self, x: np.ndarray) -> np.ndarray:
-        """
-        Predict the class probabilities for a set of input vectors.
-        :param x: Array of input vectors to predict class probabilities for.
-        :return: Array of predicted class probabilities corresponding to the input vectors.
-        """
-        if self.patterns is None:
-            raise ValueError("Model has not been fitted yet.")
-        probablities = np.zeros((x.shape[0], len(self.patterns)))
-        for cls, patterns in self.patterns.items():
-            score = np.sum(self.kernel(x, patterns, self.sigma))
-            probablities[:, cls] = score
-        return probablities / np.sum(probablities, axis=1, keepdims=True)
-
-
     def predict_single(self, x: np.ndarray) -> Optional[float]:
         """
         Predict the class label for a single input
@@ -67,3 +52,16 @@ class PNN:
         :return: Array of predicted class labels corresponding to the input vectors.
         """
         return np.array([self.predict_single(xi) for xi in x])
+
+    def summation_layer(self, x: np.ndarray) -> dict:
+        """
+        Compute the summation layer output for a given input vector.
+        :param x: Input vector
+        :return: A dictionary where keys are class labels and values are the summation layer outputs for each class. {class_label: summation_output}
+        """
+        if self.patterns is None:
+            raise ValueError("Model has not been fitted yet.")
+        summation_outputs = {}
+        for cls, patterns in self.patterns.items():
+            summation_outputs[cls] = np.sum(self.kernel(x, patterns, self.sigma))
+        return summation_outputs

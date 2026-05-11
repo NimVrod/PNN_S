@@ -56,7 +56,7 @@ def main():
         p.fit(x_train, y_train)
         for kernel in kerns:
             p.kernel = kernel
-            y_pred = np.array([p.predict_single(x) for x in x_test])
+            y_pred = p.predict(x_test) 
             accuracy = np.mean(y_pred == y_test)
             silverman_accuracy[kernel.__name__] = accuracy
     print("Silverman's rule of thumb accuracies:")
@@ -96,8 +96,8 @@ def main():
         # plt.fill_between(sigmas, mins, maxs, alpha=0.2)
 
     plt.xlabel("Sigma")
-    plt.ylabel("Accuracy")
-    plt.title("Performance of Different Configurations")
+    plt.ylabel("Średnia dokładność")
+    plt.title("Wpływ parametru sigma na dokładność PNN dla różnych funkcji jądra")
     plt.legend()
     plt.grid(True, alpha=0.25)
     plt.tight_layout()
@@ -139,7 +139,7 @@ def kFold_search(
                 x_train, x_test = x[train_index], x[test_index]
                 y_train, y_test = y[train_index], y[test_index]
                 p.fit(x_train, y_train)
-                y_pred = np.array([p.predict_single(x) for x in x_test])
+                y_pred = p.predict(x_test)
                 fold_accuracy = np.mean(y_pred == y_test)
                 fold_accuracies.append(fold_accuracy)
             accuracies[kernel_name][sigma] = np.array(fold_accuracies)
