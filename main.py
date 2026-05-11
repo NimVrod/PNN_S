@@ -1,3 +1,8 @@
+import matplotlib
+import platform
+if platform.system() == "Linux":
+    matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import KFold
@@ -63,7 +68,7 @@ def main():
     for kernel_name, acc in silverman_accuracy.items():
         print(f"Kernel: {kernel_name}, Accuracy: {acc:.4f}")
     # Best sigma and kernel search using K-Fold Cross-Validation
-    accuracies = kFold_search(x, y, kerns=kerns, max_sigma=1, diff_sigma=0.1)
+    accuracies = kFold_search(x, y, kerns=kerns, max_sigma=1, diff_sigma=0.5)
 
     # Find best kernel/sigma by mean fold accuracy
     best_kernel, best_sigma, best_stats = max(
@@ -101,6 +106,7 @@ def main():
     plt.legend()
     plt.grid(True, alpha=0.25)
     plt.tight_layout()
+    plt.savefig("kernel_sigma_comparison.png")
     plt.show()
 
 

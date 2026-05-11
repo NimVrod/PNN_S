@@ -4,13 +4,6 @@
 class PnnKernels:
     @staticmethod
     def gaussian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
-        """
-        Gaussian kernel function to compute similarity between two vectors.
-        :param x: Vector representing the input pattern.
-        :param y: Vector representing the output pattern.
-        :param sigma: The sigma parameter for the kernel function.
-        :return: The similarity score between the two vectors.
-        """
         if sigma <= 0:
             raise ValueError("sigma must be > 0")
 
@@ -21,13 +14,6 @@ class PnnKernels:
 
     @staticmethod
     def laplacian_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
-        """
-        Laplacian kernel: exp(-||x - y||_1 / sigma).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param sigma: Bandwidth parameter (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if sigma <= 0:
             raise ValueError("sigma must be > 0")
 
@@ -37,13 +23,6 @@ class PnnKernels:
 
     @staticmethod
     def cauchy_kernel(x: np.ndarray, y: np.ndarray, sigma: float) -> np.ndarray:
-        """
-        Cauchy kernel: 1 / (1 + ||x - y||^2 / sigma^2).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param sigma: Scale parameter (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if sigma <= 0:
             raise ValueError("sigma must be > 0")
 
@@ -53,13 +32,6 @@ class PnnKernels:
 
     @staticmethod
     def inverse_multiquadric_kernel(x: np.ndarray, y: np.ndarray, c: float) -> np.ndarray:
-        """
-        Inverse multiquadric kernel with scale factor: (1 / c) / sqrt(||x - y||^2 + c^2).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param c: Positive constant controlling smoothness (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if c <= 0:
             raise ValueError("c must be > 0")
 
@@ -69,13 +41,6 @@ class PnnKernels:
 
     @staticmethod
     def epanechnikov_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
-        """
-        Epanechnikov kernel: max(0, 1 - ||x - y||^2 / h^2).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param h: Bandwidth parameter (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if h <= 0:
             raise ValueError("h must be > 0")
 
@@ -85,13 +50,6 @@ class PnnKernels:
     
     @staticmethod
     def triangular_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
-        """
-        Triangular kernel: max(0, 1 - ||x - y|| / h).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param h: Bandwidth parameter (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if h <= 0:
             raise ValueError("h must be > 0")
 
@@ -101,13 +59,6 @@ class PnnKernels:
     
     @staticmethod
     def uniform_kernel(x: np.ndarray, y: np.ndarray, h: float) -> np.ndarray:
-        """
-        Uniform kernel: 0.5 * (||x - y|| <= h).
-        :param x: Input vector of shape (n_features,) or batch (n_samples, n_features).
-        :param y: Reference vectors of shape (n_samples, n_features) or a single vector.
-        :param h: Bandwidth parameter (must be > 0).
-        :return: Similarity scores, shape (n_samples,).
-        """
         if h <= 0:
             raise ValueError("h must be > 0")
 
