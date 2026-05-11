@@ -1,3 +1,5 @@
+from random import gauss
+
 import matplotlib
 import platform
 if platform.system() == "Linux":
@@ -108,6 +110,30 @@ def main():
     plt.tight_layout()
     plt.savefig("kernel_sigma_comparison.png")
     plt.show()
+
+    # Check if you need normalization in kernels
+    kernels = [
+        PnnKernels.gaussian_kernel,
+        lambda x, y, sigma: np.exp(-np.sum((x - y) ** 2, axis=1) / (2 * sigma ** 2)),  # Gaussian without normalization
+    ]
+
+    accs = kFold_search(x, y, kerns=kernels, max_sigma=1, diff_sigma=0.1)
+    gauss_acc = accs[kernels[0].__name__]
+    no_norm_acc = accs[kernels[1].__name__]
+    # Compare dictionaries of sigma -> fold-accuracies safely.
+    # First ensure the same set of sigma keys, then compare arrays per key using allclose.
+    same_keys = set(gauss_acc.keys()) == set(no_norm_acc.keys())
+    if not same_keys:
+        is_same = False
+    else:
+        is_same = all(
+            np.allclose(gauss_acc[sigma], no_norm_acc[sigma])
+            for sigma in gauss_acc.keys()
+        )
+    print(f"Gaussian kernel (with normalization) equals no-norm Gaussian? {is_same}")
+    
+    
+
 
 
 def kFold_search(

@@ -18,10 +18,17 @@
   )
 ])
 
-#set heading(numbering: "1.1.1.")
+#set heading(numbering: "1.1.1.", supplement: [Rozdział]) // TODO: Make it so depth >= 2 is Podrozdział
 #set text(lang: "pl")
 #set math.equation(numbering: "(1.1)")
 #show figure: set block(breakable: true)
+#show figure.where(kind: raw): set figure(supplement: [Listing])
+#show table: set block(breakable: false)
+
+#let appendix(body) = {
+  set heading(numbering: none, supplement: [Appendix])
+  body
+}
 
 //Title page
 #page(numbering: none, header: none, footer: none)[
@@ -112,7 +119,7 @@ Estimation*, KDE) i jest szeroko stosowana w zadaniach klasyfikacji nadzorowanej
     edge(<sa>, <out>, "->"),
     edge(<sb>, <out>, "->"),
   ),
-  caption: [Model probabilistycznej sieci neuronowej (PNN) \ Dla przejrzystości pokazano tylko 2 wzorce treningowe dla każdej z 2 klas oraz 2 cechy wejściowe],
+  caption: [Model probabilistycznej sieci neuronowej (PNN) \ Dla przejrzystości pokazano tylko 2 wzorce treningowe dla każdej z 2 klas oraz $p =2$ cechy wejściowe],
 ) <Diagram_PNN>
 
 Poszczególne symbole użyte na #ref(<Diagram_PNN>, supplement: [Rysunku]) oznaczają:
@@ -172,7 +179,7 @@ Zakładając równe prawdopodobieństwa *a priori* #footnote([Każda klasa na po
 klasyfikacji, obserwacja $bold(x)$ zostaje przypisana do klasy $hat(k)$ o najwyższej
 estymowanej gęstości prawdopodobieństwa
 
-$ hat(k) = op("arg max")_k  f_k (bold(x)) $
+$ hat(k) = op("arg max")_k f_k (bold(x)) $
 
 Architektura PNN zapewnia brak problemu minimów lokalnych (sieć nie jest trenowana
 gradientowo) oraz asymptotyczną zbieżność do optymalnego klasyfikatora bayesowskiego
@@ -287,46 +294,46 @@ Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia i
 
 #figure(
   table(
-  columns: (auto, auto, 1fr, auto),
-  stroke: 0.5pt,
-  fill: (col, row) => if row == 0 { rgb("#2c3e50") } else if calc.odd(row) { rgb("#f2f2f2") } else { white },
-  inset: 7pt,
-  align: (col, row) => if col == 0 or col == 3 { center } else { left },
-  // Nagłówek
-  table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Nr]],
-  table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Nazwa atrybutu]],
-  table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Opis]],
-  table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Zakres wartości]],
+    columns: (auto, auto, 1fr, auto),
+    stroke: 0.5pt,
+    fill: (col, row) => if row == 0 { rgb("#2c3e50") } else if calc.odd(row) { rgb("#f2f2f2") } else { white },
+    inset: 7pt,
+    align: (col, row) => if col == 0 or col == 3 { center } else { left },
+    // Nagłówek
+    table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Nr]],
+    table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Nazwa atrybutu]],
+    table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Opis]],
+    table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Zakres wartości]],
 
-  // word_freq_*
-  [1–48],
-  [word\_freq\_SŁOWO],
-  [Procentowy udział danego słowa (make, free, you, credit, money, hp itp.) w całkowitej liczbie słów wiadomości. Obliczane jako $100 dot n_"słowo" / n_"słów"$. Zbiór zawiera 48 różnych słów charakterystycznych dla spamu i poczty służbowej.],
-  [$[0, 100]$],
+    // word_freq_*
+    [1–48],
+    [word\_freq\_SŁOWO],
+    [Procentowy udział danego słowa (make, free, you, credit, money, hp itp.) w całkowitej liczbie słów wiadomości. Obliczane jako $100 dot n_"słowo" / n_"słów"$. Zbiór zawiera 48 różnych słów charakterystycznych dla spamu i poczty służbowej.],
+    [$[0, 100]$],
 
-  // char_freq_*
-  [49–54],
-  [char\_freq\_ZNAK],
-  [Procentowy udział danego znaku (; ( \[ ! \$ \#) w całkowitej liczbie znaków wiadomości. Obliczane jako $100 dot n_"znak" / n_"znaków"$. Znaki takie jak ! i \$ są silnymi wskaźnikami spamu.],
-  [$[0, 100]$],
+    // char_freq_*
+    [49–54],
+    [char\_freq\_ZNAK],
+    [Procentowy udział danego znaku (; ( \[ ! \$ \#) w całkowitej liczbie znaków wiadomości. Obliczane jako $100 dot n_"znak" / n_"znaków"$. Znaki takie jak ! i \$ są silnymi wskaźnikami spamu.],
+    [$[0, 100]$],
 
-  // capital_run_length_*
-  [55], [capital\_run\_length\_average],
-        [Średnia długość nieprzerwanych sekwencji wielkich liter (wartość rzeczywista)],
-        [$[1, 1102.5]$],
-  [56], [capital\_run\_length\_longest],
-        [Długość najdłuższej nieprzerwanej sekwencji wielkich liter (wartość całkowita)],
-        [$[1, 9989]$],
-  [57], [capital\_run\_length\_total],
-        [Łączna liczba wielkich liter w całej wiadomości (wartość całkowita)],
-        [$[1, 15841]$],
+    // capital_run_length_*
+    [55], [capital\_run\_length\_average],
+    [Średnia długość nieprzerwanych sekwencji wielkich liter (wartość rzeczywista)],
+    [$[1, 1102.5]$],
+    [56], [capital\_run\_length\_longest],
+    [Długość najdłuższej nieprzerwanej sekwencji wielkich liter (wartość całkowita)],
+    [$[1, 9989]$],
+    [57], [capital\_run\_length\_total],
+    [Łączna liczba wielkich liter w całej wiadomości (wartość całkowita)],
+    [$[1, 15841]$],
 
-  // Zmienna docelowa
-  [58], [spam],
-        [Klasa wiadomości: *1* = wiadomość jest spamem, *0* = wiadomość nie jest spamem],
-        [$\{0,1\}$],
-),
-  caption: [Opis cech zbioru danych spambase],
+    // Zmienna docelowa
+    [58], [spam],
+    [Klasa wiadomości: *1* = wiadomość jest spamem, *0* = wiadomość nie jest spamem],
+    [$\{0,1\}$],
+  ),
+  caption: [Opis cech zbioru danych spambase @spambase],
 )
 
 Dane przed przetwarzaniem są normalizowane, ponieważ cechy zbioru danych mają różne zakresy wartości (częstość występowania słów to zakres od $0$ do $1$, natomist  długość wiadomości to zakres od $0$ do $10000$).
@@ -349,6 +356,8 @@ Jeżeli nie przeprowadzimy normalizacji, odległości euklidesowe obliczane prze
 Po znormalizowaniu danych, każda cecha ma wartość średnią równą $0$ i odchylenie standardowe równe $1$. Dzięki temu PNN może efektywnie obliczać odległości euklidesowe i estymować gęstość prawdopodobieństwa bez dominacji jednej cechy nad innymi.
 
 = Skrypt programu
+//TODO: Zamiast pokazywać cały kod, pokazać tylko kluczowe fragmenty i opisać resztę słownie, ewentualnie dodać link do repozytorium z pełnym kodem
+
 #figure(
   block(
     align(left, raw(read("../main.py"), lang: "python")),
@@ -371,7 +380,7 @@ Po znormalizowaniu danych, każda cecha ma wartość średnią równą $0$ i odc
 )
 Funkcja ```py def fit()``` odopowiada uczeniu się sieci. Przypisuje ona każdej klasie jej wzorce.
 
-Funkcja ```py def predict_single()```, odpowiada zadaniu klasyfikacji za pomocą PNN, dla każdego wzorca wywołuje funkcję jądra, sumuje jej wynik a następenie określa najbardziej prawdopodobną klasę.
+Funkcja ```py def predict_single()```, odpowiada zadaniu klasyfikacji za pomocą PNN, dla każdego wzorca wywołuje funkcję jądra, sumuje jej wynik a następnie określa najbardziej prawdopodobną klasę.
 
 #figure(
   block(
@@ -379,7 +388,7 @@ Funkcja ```py def predict_single()```, odpowiada zadaniu klasyfikacji za pomocą
     breakable: true,
     width: 100%,
   ),
-  caption: [Klasa implementująca funkcje jądra używane w probabilistycznej sieci neuronowej z _#ref(<kernel>, supplement: [Sekcji])_],
+  caption: [Klasa implementująca funkcje jądra używane w probabilistycznej sieci neuronowej z _#ref(<kernel>, supplement: [Rozdziału])_],
   kind: raw,
   placement: none,
 )
@@ -453,8 +462,45 @@ Jądra cauchy'ego i odwrotna multikwadratowa nie są odpowiednie dla tego zbioru
 
 Wykorzystaliśmy również regułę Silvermana (_#ref(<sigmasearch>)_) do oszacowania optymalnej wartości $sigma$ na podstawie odchylenia standardowego cech. Dla naszego zbioru danych, reguła Silvermana zasugerowała wartość $sigma^* = 0.1962$, sprawdzając tą wartość z każdym z jąder uzyskaliśmy największą średnią dokładność dla jądra laplasjańskiego ($0.9141$), co jest zgodne z wynikami uzyskanymi podczas eksperymentu z walidacją krzyżową.
 
-== Badanie wpływu stałej normalizującej funkcje jądra
-// TODO: Dodać sprawdzanie czy wartości normalizujące coś zmieniają
+== Badanie wpływu stałej normalizującej w funkcjach jądra
+W prawie każdej definicji funkcji jądra uwzględnione są stałe normalizujące, które zapewniają, że jądro jest poprawnie znormalizowane jako estymator gęstości. Jednak w kontekście klasyfikacji, gdzie ostateczna decyzja opiera się na argmaxie estymowanej gęstości, te stałe nie wpływają na wynik klasyfikacji, ponieważ są one takie same dla wszystkich klas i nie zmieniają relatywnych wartości estymowanych gęstości.
+
+Możemy przeprowadzić eksperyment, w którym porównamy dokładność klasyfikacji z uwzględnieniem stałych normalizujących i bez nich. Oczekujemy, że dokładność pozostanie taka sama, co potwierdzi, że te stałe nie mają wpływu na decyzję klasyfikacyjną.
+
+Dane sprawdzimy dla jądra gaussowskiego i parametru $sigma in {0.001, 0.101, 0.201, dots, 2}$
+
+#figure(
+  ```py
+  # Check if you need normalization in kernels
+    kernels = [
+        PnnKernels.gaussian_kernel,
+        lambda x, y, sigma: np.exp(-np.sum((x - y) ** 2, axis=1) / (2 * sigma ** 2)),  # Gaussian without normalization
+    ]
+
+    accs = kFold_search(x, y, kerns=kernels, max_sigma=1, diff_sigma=0.1)
+    gauss_acc = accs[kernels[0].__name__]
+    no_norm_acc = accs[kernels[1].__name__]
+    # First ensure the same set of sigma keys, then compare arrays per key using allclose.
+    same_keys = set(gauss_acc.keys()) == set(no_norm_acc.keys())
+    if not same_keys:
+        is_same = False
+    else:
+        is_same = all(
+            np.allclose(gauss_acc[sigma], no_norm_acc[sigma])
+            for sigma in gauss_acc.keys()
+        )
+    print(f"Gaussian kernel (with normalization) equals no-norm Gaussian? {is_same}")
+  ```,
+  caption: [Część skryptu odpowiedzialna za porównanie dokładności klasyfikacji z uwzględnieniem stałych normalizujących funkcje jądra i bez nich],
+)
+Po uruchomieniu otrzymujemy:
+#figure(
+  ```
+    Gaussian kernel (with normalization) equals no-norm Gaussian? True
+  ```,
+)
+Co potwierdza, że stałe normalizujące nie mają wpływu na dokładność klasyfikacji, ponieważ oba warianty jądra dają taką samą dokładność.
+
 
 
 = Podsumowanie i wnioski
@@ -465,6 +511,8 @@ Uzyskane wyniki potwierdzają, że skuteczność PNN silnie zależy od doboru hi
 
 Reguła Silvermana okazała się użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie mogła być dostrojona za pomocą walidacji krzyżowej, co potwierdziło jej praktyczną wartość w kontekście PNN.
 
+Sprawdziliśmy również, że stałe normalizujące w funkcjach jądra nie wpływają na dokładność klasyfikacji, co jest zgodne z teoretycznymi oczekiwaniami, ponieważ decyzja klasyfikacyjna opiera się na argmaxie estymowanej gęstości, a te stałe są takie same dla wszystkich klas.
+
 Probabilistyczne sieci neuronowe są skuteczną metodą klasyfikacji, podczas naszych eksperymentów osiągnęły wysoką dokładność porównywalną z innymi metodami klasyfikacji #cite(<spambase>). Mimo bardzo krótkiego czasu uczenia, PNN może być konkurencyjną alternatywą dla bardziej złożonych modeli, zwłaszcza w zadaniach z niewielką ilością danych.
 
 Najważniejsze wnioski:
@@ -474,3 +522,11 @@ Najważniejsze wnioski:
 - ograniczeniem PNN pozostaje koszt pamięciowy i obliczeniowy przy dużej liczbie wzorców.
 
 #bibliography("bibliography.bib")
+
+#appendix([
+  = Dodatki
+  #enum(
+    [Repozytorium z kodem źródłowym projektu dostępne na #link("https://github.com/NimVrod/PNN_S")],
+    numbering: "[1]",
+  )
+])
