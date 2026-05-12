@@ -18,12 +18,17 @@
   )
 ])
 
-#set heading(numbering: "1.1.1.", supplement: [Rozdział]) // TODO: Make it so depth >= 2 is Podrozdział
+#set heading(numbering: "1.1.1.", supplement: [Rozdział])
+/* Wheter to show heading as Rozdział, Podrozdział or Podpodrozdział depends on the level of heading. For example, if we want to show heading with level 2 as Rozdział, level 3 as Podrozdział and level 4 as Podpodrozdział, we can use the following code:
+#show heading.where(level: 2): set heading(supplement: [Podrozdział])
+#show heading.where(level: 3): set heading(supplement: [Podrozdział])
+*/
+
 #set text(lang: "pl")
 #set math.equation(numbering: "(1.1)")
 #show figure: set block(breakable: true)
 #show figure.where(kind: raw): set figure(supplement: [Listing])
-#show table: set block(breakable: false)
+//#show table: set block(breakable: false)
 
 #let appendix(body) = {
   set heading(numbering: none, supplement: [Appendix])
@@ -203,13 +208,6 @@ Funkcja jądra $K(bold(x), bold(x)_i)$ określa, jak silnie wzorzec $bold(x)_i$
 wpływa na estymowaną gęstość w punkcie $bold(x)$ #cite(<silverman1986density>).
 Wybór funkcji jądra wpływa na kształt granicy decyzyjnej i odporność modelu na szum.
 Nie ma jednej uniwersalnej funkcji jądra, która byłaby najlepsza dla wszystkich problemów -- dobór powinien być dostosowany do charakterystyki danych #cite(<specht1990pnn>).
-
-//TODO: Zapytać czy warto dodać więcej funkcji jądra, np. Sigmoid, Spline, czy Multiquadric
-// TODO: Zapytać czy mogę pozbyć się stałych normalizujących, które nie wpływają na decyzję (argmax) w kontekście klasyfikacji, ale są istotne dla estymacji gęstości
-/*
-W poniższych wzorach uwzględniamy stałe normalizujące zgodne z implementacją, aby otrzymać pełne postaci funkcji jądra użytych w eksperymentach.
-Jeżeli sieć byłaby używana tylko do klasyfikacji, można by pominąć stałe normalizujące, ponieważ nie wpływają one na ostateczną decyzję (argmax), ale w kontekście estymacji gęstości są one istotne dla poprawnej interpretacji wyników. #cite(<PatternClassification>)
-*/
 
 === Gaussowska (Gaussian Kernel)
 
@@ -478,6 +476,7 @@ Metoda ```py def predict()``` jest pomocniczą funkcją, która umożliwia przew
   placement: none,
 )
 Każda metoda z ```py class PNNKernels``` implementuje inną funkcję jądra, która jest używana do obliczania podobieństwa między wektorem wejściowym a wzorcami treningowymi. W eksperymentach porównujemy różne funkcje jądra, aby zobaczyć, jak wpływają one na dokładność klasyfikacji.
+Każda funkcja jądra jest zaimplementowana w osobnej metodzie klasy ```py class PnnKernels```, co pozwala na łatwe dodawanie nowych funkcji jądra i eksperymentowanie z różnymi konfiguracjami.
 
 = Eksperymenty
 
@@ -547,7 +546,7 @@ Badamy wartości $sigma$ w zakresie od $0.001$ do $2$ z krokiem $0.005$, co pozw
   image("Images/pnn2.png", width: 95%),
   caption: [Wykres dokładności dla różnych konfiguracji jądra i wartości sigma. \ Każda linia reprezentuje inną funkcję jądra, a oś x przedstawia wartości sigma. Każdy punkt na wykresie to średnia dokładność uzyskana z walidacji krzyżowej dla danej kombinacji jądra i sigma.],
 )
-Najlepszą dokładność klasyfikacji osiągnięto dla jądra laplasjańskiego przy $sigma = 0.611$, (średnia dokładność $0.9244$ , min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągneło ono podobne wyniki. Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (_#ref(<PorownanieJader>)_).
+Najlepszą dokładność klasyfikacji osiągnięto dla *jądra laplasjańskiego przy $sigma = 0.611$ -- $92.44%$*, (średnia dokładność $0.9244$ , min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągneło ono podobne wyniki. Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (_#ref(<PorownanieJader>)_).
 Jądra cauchy'ego i odwrotna multikwadratowa nie są odpowiednie dla tego zbioru danych, ich dokładność nie przekroczyła $0.8$ dla żadnej wartości $sigma$.
 
 === Wykorzystanie reguły Silvermana do oszacowania optymalnej wartości $sigma$
