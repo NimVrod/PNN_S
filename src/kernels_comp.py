@@ -11,20 +11,20 @@ labels = [r"$\sigma = 0.1$", r"$\sigma = 0.3$", r"$\sigma = 0.5$", r"$\sigma = 1
 
 def epanechnikov(d, s):
     u = d / s
-    return np.where(np.abs(u) <= 1, (3 / (4 * s)) * (1 - u**2), 0.0)
+    return np.where(np.abs(u) <= 1, 0.75 * (1 - u**2), 0.0)
 
 def triangular(d, s):
     u = d / s
-    return np.where(np.abs(u) <= 1, (1 / s) * (1 - np.abs(u)), 0.0)
+    return np.where(np.abs(u) <= 1, 1 - np.abs(u), 0.0)
 
 kernels = {
-    "Gaussowska\n(Gaussian Kernel)":               lambda d, s: (1 / (s * np.sqrt(2 * np.pi))) * np.exp(-d**2 / (2*s**2)),
-    "Laplasjańska\n(Laplacian Kernel)":             lambda d, s: (1 / (2 * s)) * np.exp(-np.abs(d) / s),
-    "Cauchy'ego\n(Cauchy Kernel)":                  lambda d, s: (1 / (np.pi * s)) * (1 / (1 + d**2 / s**2)),
-    "Odwrotna multikwadratowa\n(Inverse Multiquadric Kernel)": lambda d, s: (1 / s) * (1 / np.sqrt(d**2 + s**2)),
+    "Gaussowska\n(Gaussian Kernel)":               lambda d, s: np.exp(-d**2 / (2*s**2)),
+    "Laplasjańska\n(Laplacian Kernel)":             lambda d, s: np.exp(-np.abs(d) / s),
+    "Cauchy'ego\n(Cauchy Kernel)":                  lambda d, s: 1 / (1 + d**2 / s**2),
+    "Odwrotna multikwadratowa\n(Inverse Multiquadric Kernel)": lambda d, s: 1 / np.sqrt(d**2 + s**2),
     "Epanecznikowa\n(Epanechnikov Kernel)":          epanechnikov,
     "Trójkątna\n(Triangular Kernel)":               triangular,
-    "Jednostajna\n(Uniform Kernel)":                lambda d, s: np.where(np.abs(d) <= s, 1 / (2 * s), 0.0)
+    "Jednostajna\n(Uniform Kernel)":                lambda d, s: np.where(np.abs(d) <= s, 0.5, 0.0)
 }
 
 num_kernels = len(kernels)
@@ -36,7 +36,6 @@ fig.patch.set_facecolor("#f8fafc")
 axes_flat = np.atleast_1d(axes).ravel()
 
 for ax, (title, fn) in zip(axes_flat, kernels.items()):
-    ax.set_facecolor("#ffffff")
     for s, c, lbl in zip(sigmas, colors, labels):
         y = fn(x, s)
         ax.plot(x, y, color=c, linewidth=2.0, label=lbl)
