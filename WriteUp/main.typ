@@ -19,7 +19,7 @@
 ])
 
 #set heading(numbering: "1.1.1.", supplement: [Rozdział])
-/* Wheter to show heading as Rozdział, Podrozdział or Podpodrozdział depends on the level of heading. For example, if we want to show heading with level 2 as Rozdział, level 3 as Podrozdział and level 4 as Podpodrozdział, we can use the following code:
+/* Whether to show heading as Rozdział, Podrozdział or Pod-podrozdział depends on the level of heading. For example, if we want to show heading with level 2 as Rozdział, level 3 as Podrozdział and level 4 as Podpodrozdział, we can use the following code:
 #show heading.where(level: 2): set heading(supplement: [Podrozdział])
 #show heading.where(level: 3): set heading(supplement: [Podrozdział])
 */
@@ -37,14 +37,12 @@
 
 //Title page
 #page(numbering: none, header: none, footer: none)[
-  //TODO: Add prz images
   #align(top)[
     #grid(
-  columns: (1fr, 1fr),
-  rows: auto,
-  align(left)[#image("Assets/rut.png", height: 2.5cm)],
-  align(right)[#image("Assets/weii.png", height: 2.5cm)]
-)
+      columns: (1fr, 1fr),
+      rows: auto,
+      align(left)[#image("Assets/rut.png", height: 2.5cm)], align(right)[#image("Assets/weii.png", height: 2.5cm)],
+    )
   ]
 
   #align(center)[
@@ -55,7 +53,7 @@
     #text(size: 0.5cm)[Probabilistyczna sieć neuronowa] // Laboratory subject
 
     #align(bottom)[
-      Hubert Dec $-$ 179474 $-$ L04 //Author information
+      Hubert Dec -- 179474 -- L04 //Author information
       #linebreak()
       #datetime.today().display()
     ]
@@ -67,12 +65,12 @@
 #pagebreak()
 
 = Opis problemu
-Zadaniem projektu jest implementacja i analiza probabilistycznej sieci neuronowej (PNN) #cite(<specht1990pnn>) w kontekście klasyfikacji wiadomości e-mail jako spam lub nie-spam. Na podstawie zbioru danych spamebase #cite(<spambase>). Zostaną również przeprowadzone eksperymenty badające wpływ różnych funkcji jądra i wartości parametru wygładzania $sigma$ na dokładność klasyfikacji.
+Zadaniem projektu jest implementacja i analiza probabilistycznej sieci neuronowej (PNN) #cite(<specht1990pnn>) w kontekście klasyfikacji wiadomości e-mail jako spam lub nie-spam. Na podstawie zbioru danych spambase #cite(<spambase>). Zostaną również przeprowadzone eksperymenty badające wpływ różnych funkcji jądra i wartości parametru wygładzania $sigma$ na dokładność klasyfikacji.
 
 //TODO: może to lepiej napisać niż haiku
 Spam stanowi poważny problem w komunikacji internetowej, powodując obciążenia dla serwerów poczty i negatywne doświadczenie użytkowników. Klasyfikacja wiadomości e-mail jako spam lub nie-spam wymaga rozróżnienia na podstawie charakterystyk takich jak zawartość tekstu, formatowanie i metadane.
 
-Probabilistyczne sieci neuronowe są szczególnie przydatne dla tego problemu ze względu na: brak iteracyjnego uczenia (szybkie trenowanie na zbiorze uczącym), bezpośrednią interpretację decyzji, robustność na szum i zmienność spamu, możliwość wyboru różnych funkcji jądra, oraz asymptotyczną zbieżność do optymalnego klasyfikatora bayesowskiego. Zbiór danych spambase zawiera 4601 wiadomości (57% spamu) -- wystarczającą wielkość dla efektywnego trenowania PNN.
+Probabilistyczne sieci neuronowe są szczególnie przydatne dla tego problemu ze względu na: brak iteracyjnego uczenia (szybkie trenowanie na zbiorze uczącym), bezpośrednią interpretację decyzji, odporność na szum i zmienność spamu, możliwość wyboru różnych funkcji jądra, oraz asymptotyczną zbieżność do optymalnego klasyfikatora bayesowskiego. Zbiór danych spambase zawiera 4601 wiadomości (57% spamu) -- wystarczającą wielkość dla efektywnego trenowania PNN.
 
 
 = Część teoretyczna <teoria>
@@ -168,7 +166,7 @@ wejściem a zapamiętanym wzorcem, a następnie przetwarza ją przez funkcję j�
 $ phi_(k j)(bold(x)) = frac(1, sigma sqrt(2 pi)) exp lr(( -frac(||bold(x) - bold(x)_(k j)||^2, 2 sigma^2) )) $
 
 gdzie:
-- $||bold(x) - bold(x)_(k j)||$ -- odległość euklidesowa w przestrzeni cech (_#ref(<eq_distance>)_),
+- $||bold(x) - bold(x)_(k j)||$ -- odległość euklidesowa w przestrzeni cech (zob. _#ref(<eq_distance>)_),
 - $sigma$ -- parametr wygładzania (*smoothing parameter* lub *bandwidth*),
   decydujący o szerokości funkcji dzwonowej (zob. @sigma).
 
@@ -186,8 +184,9 @@ Każdy neuron sumujący agreguje wyjścia neuronów wzorcowych należących do t
 
 $ S_k (bold(x)) = sum_(j=1)^(N_k) phi_(k j)(bold(x)) $
 
+//TODO: może to lepiej napisać niż haiku
 gdzie $N_k$ to liczba wzorców treningowych klasy $k$. Wynik $S_k$ jest proporcjonalny
-do estymowanej gęstości prawdopodobieństwa klasy $k$, $phi$ to funkcja jądra (#ref(<kernel>)), a $bold(x)$ to wektor cech obserwacji.
+do estymowanej gęstości prawdopodobieństwa klasy $k$, $phi$ to funkcja jądra (zob. #ref(<kernel>)), a $bold(x)$ to wektor cech obserwacji.
 
 === Warstwa wyjściowa (Output Layer)
 
@@ -252,7 +251,7 @@ Jądro trójkątne jest funkcją liniową, która maleje wraz z odległością, 
 $ K(x, x_i) = cases(1/2 "kiedy" ||x - x_i|| <= sigma, 0 "w przeciwnym wypadku") $
 Jądro jednostkowe jest funkcją o stałej wartości wewnątrz obszaru wsparcia i zerowej wartości poza nim. Jest to najprostsze jądro, które uwzględnia tylko obserwacje znajdujące się w promieniu $sigma$ od punktu estymacji, przypisując im jednakową wagę. Ze względu na swoją prostotę, jądro jednostkowe może być mniej skuteczne w zadaniach, gdzie ważne jest uwzględnienie różnic w odległości między obserwacjami a punktem estymacji.
 
-Porównanie kształtu różnych funkcji jądra dla kilku wartości $sigma$ przedstawiono na #ref(<PorownanieJader>, supplement: [Rysunku]).
+Porównanie kształtu różnych funkcji jądra przedstawiono na #ref(<PorownanieJader>, supplement: [Rysunku]).
 
 == Parametr wygładzania $sigma$ <sigma>
 
@@ -267,7 +266,7 @@ treningowego na estymowaną gęstość #cite(<specht1990pnn>):
 
 #figure(
   image("Images/porownaniejader2.png"),
-  caption: [Porównanie kształtu różnych funkcji jądra dla kilku wartości $sigma$],
+  caption: [Porównanie kształtu funkcji jądra dla kilku wartości $sigma$],
 ) <PorownanieJader>
 
 
@@ -295,12 +294,10 @@ Sieć PNN różni się od tradycyjnych sieci neuronowych, takich jak perceptron 
 - *Bezpośrednia reprezentacja zbioru uczącego* -- każdy neuron wzorcowy odpowiada dokładnie jednemu przykładowi treningowemu, co pozwala od razu wykorzystać cały zbiór danych bez konieczności jego kompresji,
 - *Estymacja gęstości zamiast funkcji decyzyjnej* -- PNN opiera się na estymacji gęstości prawdopodobieństwa klas, natomiast MLP i CNN uczą się bezpośrednio funkcji decyzyjnej, co wpływa na kształt granic decyzyjnych oraz odporność modelu na szum.
 
-PNN jest szczególnie skuteczna w zadaniach klasyfiPorównanie kształtu różnych funkcji jądra dla kilku wartościkacji, w których dostępna jest niewielka liczba danych, ponieważ tradycyjne sieci mogą mieć wtedy trudności z generalizacją. Z drugiej strony, ze względu na bezpośrednią reprezentację zbioru uczącego, PNN może być niepraktyczna w przypadku bardzo dużych zbiorów danych, głównie z uwagi na wysokie wymagania pamięciowe oraz dłuższy czas predykcji.
+PNN jest szczególnie skuteczna w zadaniach klasyfikacji, w których dostępna jest niewielka liczba danych, ponieważ tradycyjne sieci mogą mieć wtedy trudności z generalizacją. Z drugiej strony, ze względu na bezpośrednią reprezentację zbioru uczącego, PNN może być niepraktyczna w przypadku bardzo dużych zbiorów danych, głównie z uwagi na wysokie wymagania pamięciowe oraz dłuższy czas predykcji.
 
 = Analiza danych
 Zbiór danych spambase #cite(<spambase>) zawiera 4601 próbek wiadomości e-mail, z których 57% to spam. Każda próbka jest reprezentowana przez 57 cech numerycznych, które opisują różne aspekty wiadomości, takie jak częstotliwość występowania określonych słów i znaków specjalnych, długość wiadomości. Celem jest klasyfikacja wiadomości jako spam lub nie-spam na podstawie tych cech.
-
-Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia ich bezpośrednie wykorzystanie w modelu PNN.
 
 #figure(
   table(
@@ -316,13 +313,13 @@ Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia i
     table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Zakres wartości]],
 
     // word_freq_*
-    [1–48],
+    [1--48],
     [word\_freq\_SŁOWO],
     [Procentowy udział danego słowa (make, free, you, credit, money, hp itp.) w całkowitej liczbie słów wiadomości. Obliczane jako $100 dot n_"słowo" / n_"słów"$. Zbiór zawiera 48 różnych słów charakterystycznych dla spamu i poczty służbowej.],
     [$[0, 100]$],
 
     // char_freq_*
-    [49–54],
+    [49--54],
     [char\_freq\_ZNAK],
     [Procentowy udział danego znaku (; ( \[ ! \$ \#) w całkowitej liczbie znaków wiadomości. Obliczane jako $100 dot n_"znak" / n_"znaków"$. Znaki takie jak ! i \$ są silnymi wskaźnikami spamu.],
     [$[0, 100]$],
@@ -345,8 +342,7 @@ Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia i
   ),
   caption: [Opis cech zbioru danych spambase @spambase],
 )
-
-Dane pobierane są z pliku `.data`, wszystkie cechy są numeryczne, wszystkie cechy poza ostatnią są zwracane jako macierz z wymiarami $N times p$, gdzie $N$ to liczba próbek, a $p$ to liczba cech (57). Ostatnia kolumna zawiera etykiety klas (0 lub 1) i jest zwracana jako wektor o długości $N$.
+Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia ich bezpośrednie wykorzystanie w modelu PNN.
 
 #figure(
   ```py
@@ -361,10 +357,11 @@ Dane pobierane są z pliku `.data`, wszystkie cechy są numeryczne, wszystkie ce
     y = data[:, -1]  # The last column is the class label
     return x, y
   ```,
-  caption: [Metoda odpowiedzialna za wczytywanie danych z pliku `.data`]
+  caption: [Metoda odpowiedzialna za wczytywanie danych z pliku `.data`],
 )
+Dane pobierane są z pliku `.data`. Wszystkie cechy poza ostatnią są zwracane jako macierz z wymiarami $N times p$, gdzie $N$ to liczba próbek, a $p$ to liczba cech (57). Ostatnia kolumna zawiera etykiety klas (0 lub 1) i jest zwracana jako wektor o długości $N$.
 
-Dane przed przetwarzaniem są normalizowane, ponieważ cechy zbioru danych mają różne zakresy wartości (częstość występowania słów to zakres od $0$ do $1$, natomist  długość wiadomości to zakres od $0$ do $10000$).
+Dane przed przetwarzaniem są normalizowane, ponieważ cechy zbioru danych mają różne zakresy wartości (częstość występowania słów to zakres od $0$ do $1$, natomiast  długość wiadomości to zakres od $0$ do $10000$).
 Jeżeli nie przeprowadzimy normalizacji, odległości euklidesowe obliczane przez PNN będą zdominowane przez cechy o większych zakresach, co może prowadzić do błędnych klasyfikacji. Normalizacja zapewnia, że wszystkie cechy mają równy wpływ na estymację gęstości i poprawia wydajność modelu.
 
 #figure(
@@ -384,8 +381,6 @@ Jeżeli nie przeprowadzimy normalizacji, odległości euklidesowe obliczane prze
 Po znormalizowaniu danych, każda cecha ma wartość średnią równą $0$ i odchylenie standardowe równe $1$. Dzięki temu PNN może efektywnie obliczać odległości euklidesowe i estymować gęstość prawdopodobieństwa bez dominacji jednej cechy nad innymi.
 
 = Skrypt programu
-//TODO: Zamiast pokazywać cały kod, pokazać tylko kluczowe fragmenty i opisać resztę słownie, ewentualnie dodać link do repozytorium z pełnym kodem
-
 #figure(
   ```py
     class PNN:
@@ -404,16 +399,16 @@ Po znormalizowaniu danych, każda cecha ma wartość średnią równą $0$ i odc
         self.sigma: float = sigma
         self.kernel = kernel
   ```,
-  caption: [Klasa implementująca probabilistyczną sieć neuronową (PNN)]
+  caption: [Klasa implementująca probabilistyczną sieć neuronową (PNN)],
 )
-Parametr ```py self.kernel``` odpowiada funkcji jądra używanej do estymacji gęstości, musi to być funkcja która przyjmuje trzy argumenty: dwa wektory (X i Y) oraz wartość $sigma$.
+Parametr ```py self.kernel``` odpowiada funkcji jądra używanej do estymacji gęstości, musi to być funkcja która przyjmuje trzy argumenty: wektor wejściowy, wektor wzorca oraz wartość parametru wygładzania $sigma$. Domyślnie jest to jądro Gaussa.
 
-```py self.sigma``` to parametr wygładzania $sigma$ kontrolujący szerokość funkcji jądra. 
+```py self.sigma``` to parametr wygładzania $sigma$ kontrolujący szerokość funkcji jądra z domyślną wartością $0.1$.
 
 Słownik ```py self.patterns``` będzie przechowywał wzorce treningowe pogrupowane według klas.
 
 #figure(
-  ```py 
+  ```py
   def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """
         Fit (Train) the PNN model to the training data by storing the patterns for each class.
@@ -423,7 +418,7 @@ Słownik ```py self.patterns``` będzie przechowywał wzorce treningowe pogrupow
         """
         self.patterns = {c: x[y == c] for c in np.unique(y)}
   ```,
-  caption: [Metoda fit() odpowiedzialna za uczenie się sieci poprzez przypisanie wzorców do klas]
+  caption: [Metoda `fit()` odpowiedzialna za uczenie się sieci poprzez przypisanie wzorców do klas],
 )
 Metoda ```py def fit()``` jest odpowiedzialna za uczenie się sieci. Przypisuje ona każdej klasie jej wzorce, tworząc słownik, w którym kluczem jest etykieta klasy, a wartością jest macierz zawierająca wzorce treningowe należące do tej klasy.
 
@@ -442,11 +437,11 @@ Metoda ```py def fit()``` jest odpowiedzialna za uczenie się sieci. Przypisuje 
         for cls, patterns in self.patterns.items():
             score = np.sum(self.kernel(x, patterns, self.sigma))
             if score > best_score:
-                best_score = score  
-                best_class = cl
+                best_score = score
+                best_class = cls
         return best_class
   ```,
-  caption: [Metoda predict_single() odpowiedzialna za przewidywanie klasy dla pojedynczej obserwacji]
+  caption: [Metoda `predict_single()` odpowiedzialna za przewidywanie klasy dla pojedynczej obserwacji],
 )
 
 Metoda ```py def predict_single()``` oblicza estymowaną gęstość prawdopodobieństwa dla każdej klasy, sumując wartości funkcji jądra między wejściem a wzorcami danej klasy. Klasa z najwyższym wynikiem jest zwracana jako przewidywana etykieta.
@@ -461,7 +456,7 @@ Metoda ```py def predict_single()``` oblicza estymowaną gęstość prawdopodobi
         """
         return np.array([self.predict_single(xi) for xi in x])
   ```,
-  caption: [Pomocnicza metoda predict()]
+  caption: [Pomocnicza metoda `predict()`],
 )
 Metoda ```py def predict()``` jest pomocniczą funkcją, która umożliwia przewidywanie klas dla wielu obserwacji jednocześnie. Dla każdego wektora wejściowego w macierzy $x$ wywołuje metodę `predict_single` i zwraca tablicę z przewidywanymi etykietami klas.
 
@@ -476,8 +471,9 @@ Metoda ```py def predict()``` jest pomocniczą funkcją, która umożliwia przew
   placement: none,
 )
 Każda metoda z ```py class PNNKernels``` implementuje inną funkcję jądra, która jest używana do obliczania podobieństwa między wektorem wejściowym a wzorcami treningowymi. W eksperymentach porównujemy różne funkcje jądra, aby zobaczyć, jak wpływają one na dokładność klasyfikacji.
-Każda funkcja jądra jest zaimplementowana w osobnej metodzie klasy ```py class PnnKernels```, co pozwala na łatwe dodawanie nowych funkcji jądra i eksperymentowanie z różnymi konfiguracjami.
+Każda funkcja jądra jest zaimplementowana w osobnej metodzie klasy ```py class PnnKernels```, co pozwala na łatwe dodawanie nowych funkcji jądra i eksperymentowanie z różnymi konfiguracjami. W każdej z tych funkcji korzystamy z `numpy` #cite(<numpydocs>) aby przyśpieszyć obliczenia i umożliwić efektywne przetwarzanie dużych zbiorów danych.
 
+Pełny kod projektu dostępny jest w _#link(<Dodatki>, [dodatkach])_
 = Eksperymenty
 
 == Badanie wpływu funkcji jądra oraz parametru wygładzania $sigma$
@@ -490,16 +486,14 @@ Dla każdej kombinacji funkcji jądra i wartości $sigma$ obliczymy dokładnoś�
 
 #figure(
   ```py
-      def kFold_search(
+    def kFold_search(
       x: np.ndarray,
       y: np.ndarray,
-      min_sigma=0.001,
-      max_sigma=2,
-      diff_sigma=0.005,
-      splits=5,
-      kerns=[
-          PnnKernels.gaussian_kernel
-      ],
+      min_sigma: float = 0.001,
+      max_sigma: float = 2,
+      diff_sigma: float = 0.005,
+      splits: int = 5,
+      kerns=[PnnKernels.gaussian_kernel],
   ) -> dict[str, dict[float, np.ndarray]]:
       """
       Perform k-fold cross-validation to search for the best sigma and kernel configuration.
@@ -527,7 +521,7 @@ Dla każdej kombinacji funkcji jądra i wartości $sigma$ obliczymy dokładnoś�
                   x_train, x_test = x[train_index], x[test_index]
                   y_train, y_test = y[train_index], y[test_index]
                   p.fit(x_train, y_train)
-                  y_pred = np.array([p.predict_single(x) for x in x_test])
+                  y_pred = p.predict(x_test)
                   fold_accuracy = np.mean(y_pred == y_test)
                   fold_accuracies.append(fold_accuracy)
               accuracies[kernel_name][sigma] = np.array(fold_accuracies)
@@ -536,7 +530,7 @@ Dla każdej kombinacji funkcji jądra i wartości $sigma$ obliczymy dokładnoś�
               )
       return accuracies
   ```,
-  caption: [Część skryptu odpowiedzialna za poszukiwanie najlepszej konfiguracji jądra i $sigma$ z użyciem walidacji krzyżowej (_#ref(<sigmasearch>)_)],
+  caption: [Część skryptu odpowiedzialna za poszukiwanie najlepszej konfiguracji jądra i $sigma$ z użyciem walidacji krzyżowej (zob. _#ref(<sigmasearch>)_)],
 )
 K-krotna walidacja jest zaimplementowana za pomocą klasy `KFold` z biblioteki `sklearn.model_selection` #cite(<skFold>) która dzieli dane na n losowych podzbiorów, w naszym przypadku $n=5$. Dla każdej kombinacji funkcji jądra i wartości $sigma$ model jest trenowany na $n-1$ podzbiorach, a następnie testowany na pozostałym podzbiorze. Proces ten jest powtarzany dla wszystkich możliwych podziałów danych, a dokładność jest obliczana jako średnia z wyników uzyskanych na wszystkich podziałach.
 
@@ -546,7 +540,10 @@ Badamy wartości $sigma$ w zakresie od $0.001$ do $2$ z krokiem $0.005$, co pozw
   image("Images/pnn2.png", width: 95%),
   caption: [Wykres dokładności dla różnych konfiguracji jądra i wartości sigma. \ Każda linia reprezentuje inną funkcję jądra, a oś x przedstawia wartości sigma. Każdy punkt na wykresie to średnia dokładność uzyskana z walidacji krzyżowej dla danej kombinacji jądra i sigma.],
 )
-Najlepszą dokładność klasyfikacji osiągnięto dla *jądra laplasjańskiego przy $sigma = 0.611$ -- $92.44%$*, (średnia dokładność $0.9244$ , min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągneło ono podobne wyniki. Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (_#ref(<PorownanieJader>)_).
+Najlepszą dokładność klasyfikacji osiągnięto dla *jądra laplasjańskiego przy $sigma = 0.611$ * co daje średnią dokładność *$0.9244$* (min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągnęło ono podobne wyniki, największa średnia dokładność dla jądra gaussowskiego wyniosła $0.9146$ (min: $0.9088$, max: $0.9250$).
+
+Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (zob. _#ref(<PorownanieJader>)_). Najlepszy wynik z tych trzech funkcji uzyskało jądro trójkątne, które osiągnęło dokładność $0.8213$ przy $sigma approx 2$. Co jest znacznie gorszym wynikiem niż jądra gaussowskie i laplasjańskie.
+
 Jądra cauchy'ego i odwrotna multikwadratowa nie są odpowiednie dla tego zbioru danych, ich dokładność nie przekroczyła $0.8$ dla żadnej wartości $sigma$.
 
 === Wykorzystanie reguły Silvermana do oszacowania optymalnej wartości $sigma$
@@ -556,7 +553,7 @@ Wykorzystaliśmy również regułę Silvermana (_#ref(<sigmasearch>)_) do oszaco
   ```py
       silverman = 1.06 * np.std(x) * (len(x) ** (-1 / 5))
   ```,
-  caption: [Część skryptu odpowiedzialna za obliczenie wartości $sigma$ na podstawie reguły Silvermana]
+  caption: [Część skryptu odpowiedzialna za obliczenie wartości $sigma$ na podstawie reguły Silvermana],
 )
 
 Obliczona wartość $sigma^* = 0.1962$
@@ -584,26 +581,29 @@ Kernel: uniform_kernel, Accuracy: 0.7413
     table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Jądro]],
     table.cell(fill: rgb("#2c3e50"))[#text(fill: white, weight: "bold")[Dokładność]],
 
-    [Gaussowska],[$0.9033$],
-    [Laplasjańska],[$0.9141$],
-    [Cauchy'ego],[$0.7511$],
-    [Odwrotna multikwadratowa],[$0.6043$],
-    [Epanecznika],[$0.7413$],
-    [Trójkątna],[$0.7413$],
-    [Jednostkowa],[$0.7413$],
+    [Gaussowska], [$0.9033$],
+    [Laplasjańska], [$0.9141$],
+    [Cauchy'ego], [$0.7511$],
+    [Odwrotna multikwadratowa], [$0.6043$],
+    [Epanecznika], [$0.7413$],
+    [Trójkątna], [$0.7413$],
+    [Jednostkowa], [$0.7413$],
   ),
-  caption: [Dokładność klasyfikacji dla różnych funkcji jądra przy wartości $sigma$ oszacowanej za pomocą reguły Silvermana]
+  caption: [Dokładność klasyfikacji dla różnych funkcji jądra przy wartości $sigma$ oszacowanej za pomocą reguły Silvermana],
 )
 
-Ponownie najlepszą dokładność osiągnęło jądro laplasjańskie. Dokładność jest mniejsza niż w przypadku optymalnego $sigma$ znalezionego za pomocą walidacji krzyżowej, ale nadal jest wysoka ($0.9141$). \  $Delta = 0.9244 - 0.9141 = 0.0103$, więć różnica jest niewielka, co potwierdza, że reguła Silvermana jest użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie może być dostrojona za pomocą walidacji krzyżowej.
+Ponownie najlepszą dokładność osiągnęło jądro laplasjańskie. Dokładność jest mniejsza niż w przypadku optymalnego $sigma$ znalezionego za pomocą walidacji krzyżowej, ale nadal jest wysoka ($0.9141$). \
+$Delta = 0.9244 - 0.9141 = 0.0103$, więc różnica jest niewielka, co potwierdza, że reguła Silvermana jest użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie może być dostrojona za pomocą walidacji krzyżowej.
 
 == Badanie wpływu stałej normalizującej w funkcjach jądra
-W prawie każdej definicji funkcji jądra uwzględnione są stałe normalizujące, które zapewniają, że jądro jest poprawnie znormalizowane jako estymator gęstości. Jednak w kontekście klasyfikacji, gdzie ostateczna decyzja opiera się na argmaxie estymowanej gęstości, te stałe nie wpływają na wynik klasyfikacji, ponieważ są one takie same dla wszystkich klas i nie zmieniają relatywnych wartości estymowanych gęstości.
-
+W prawie każdej definicji funkcji jądra uwzględnione są stałe normalizujące, które zapewniają, że jądro jest poprawnie znormalizowane jako estymator gęstości.
+Na przykład dla jądra gaussowskiego, stała normalizująca to $frac(1, sigma sqrt(2 pi))$.
+Jednak w kontekście klasyfikacji, gdzie ostateczna decyzja opiera się na maksymalnej wartości estymowanej gęstości, te stałe nie powinny wpływać na wynik klasyfikacji, ponieważ są one takie same dla wszystkich klas i nie zmieniają relatywnych wartości estymowanych gęstości.
 Możemy przeprowadzić eksperyment, w którym porównamy dokładność klasyfikacji z uwzględnieniem stałych normalizujących i bez nich. Oczekujemy, że dokładność pozostanie taka sama, co potwierdzi, że te stałe nie mają wpływu na decyzję klasyfikacyjną.
 
-Dane sprawdzimy dla jądra gaussowskiego i parametru $sigma in {0.001, 0.101, 0.201, dots, 2}$
-
+Dane sprawdzimy dla jądra gaussowskiego i parametru $sigma in {0.001, 0.101, 0.201, dots, 2}$ \
+Nieznormalizowane jądro gaussowskie będzie miało postać:
+$ K(bold(x), bold(x)_i) = exp(-frac(||bold(x) - bold(x)_i||^2, 2 sigma^2)) $
 #figure(
   ```py
   # Check if you need normalization in kernels
@@ -627,7 +627,8 @@ Dane sprawdzimy dla jądra gaussowskiego i parametru $sigma in {0.001, 0.101, 0.
     print(f"Gaussian kernel (with normalization) equals no-norm Gaussian? {is_same}")
   ```,
   caption: [Część skryptu odpowiedzialna za porównanie dokładności klasyfikacji z uwzględnieniem stałych normalizujących funkcje jądra i bez nich],
-),
+)
+
 Ponownie używamy metody `kFold_search` do porównania dokładności klasyfikacji dla jądra gaussowskiego z normalizacją i bez niej. Sprawdzamy, czy dokładności są takie same dla wszystkich wartości $sigma$. Robimy to poprzez porównanie tablic dokładności dla obu wariantów jądra i sprawdzenie, czy są one bliskie (używając `np.allclose`). Jeśli dokładności są takie same dla wszystkich wartości $sigma$, to potwierdza, że stałe normalizujące nie mają wpływu na dokładność klasyfikacji.
 
 
@@ -642,6 +643,7 @@ Co potwierdza, że stałe normalizujące nie mają wpływu na dokładność klas
 
 
 = Podsumowanie i wnioski
+//TODO: Też napisać lepiej niż LLM
 
 W ramach projektu przedstawiono teoretyczne podstawy probabilistycznej sieci neuronowej (PNN), jej architekturę oraz rolę funkcji jądra i parametru $sigma$. Następnie przeprowadzono eksperyment porównujący kilka funkcji jądra dla różnych wartości $sigma$.
 
@@ -649,7 +651,7 @@ Uzyskane wyniki potwierdzają, że skuteczność PNN silnie zależy od doboru hi
 
 Reguła Silvermana okazała się użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie mogła być dostrojona za pomocą walidacji krzyżowej, co potwierdziło jej praktyczną wartość w kontekście PNN.
 
-Sprawdziliśmy również, że stałe normalizujące w funkcjach jądra nie wpływają na dokładność klasyfikacji, co jest zgodne z teoretycznymi oczekiwaniami, ponieważ decyzja klasyfikacyjna opiera się na argmaxie estymowanej gęstości, a te stałe są takie same dla wszystkich klas.
+Sprawdziliśmy również, że stałe normalizujące w funkcjach jądra nie wpływają na dokładność klasyfikacji, co jest zgodne z teoretycznymi oczekiwaniami, ponieważ decyzja klasyfikacyjna opiera się na maksymalnej wartości estymowanej gęstości, a te stałe są takie same dla wszystkich klas.
 
 Probabilistyczne sieci neuronowe są skuteczną metodą klasyfikacji, podczas naszych eksperymentów osiągnęły wysoką dokładność porównywalną z innymi metodami klasyfikacji #cite(<spambase>). Mimo bardzo krótkiego czasu uczenia, PNN może być konkurencyjną alternatywą dla bardziej złożonych modeli, zwłaszcza w zadaniach z niewielką ilością danych.
 
@@ -662,7 +664,7 @@ Najważniejsze wnioski:
 #bibliography("bibliography.bib")
 
 #appendix([
-  = Dodatki
+  = Dodatki <Dodatki>
   #enum(
     [Repozytorium z kodem źródłowym projektu dostępne na #link("https://github.com/NimVrod/PNN_S")],
     numbering: "[1]",

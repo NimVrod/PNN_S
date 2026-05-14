@@ -1,5 +1,3 @@
-from random import gauss
-
 import matplotlib
 import platform
 if platform.system() == "Linux":
