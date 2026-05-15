@@ -540,7 +540,7 @@ Badamy wartości $sigma$ w zakresie od $0.001$ do $2$ z krokiem $0.005$, co pozw
   image("Images/pnn2.png", width: 95%),
   caption: [Wykres dokładności dla różnych konfiguracji jądra i wartości sigma. \ Każda linia reprezentuje inną funkcję jądra, a oś x przedstawia wartości sigma. Każdy punkt na wykresie to średnia dokładność uzyskana z walidacji krzyżowej dla danej kombinacji jądra i sigma.],
 )
-Najlepszą dokładność klasyfikacji osiągnięto dla *jądra laplasjańskiego przy $sigma = 0.611$ * co daje średnią dokładność *$0.9244$* (min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągnęło ono podobne wyniki, największa średnia dokładność dla jądra gaussowskiego wyniosła $0.9146$ (min: $0.9088$, max: $0.9250$).
+Najlepszą dokładność klasyfikacji osiągnięto dla *jądra laplasjańskiego przy $sigma = 0.611$*, przy średniej dokładności *$0.9244$* (min: $0.9121$, max: $0.9359$). Ze względu na podobną charakterystykę jądra gaussowskiego, osiągnęło ono podobne wyniki, największa średnia dokładność dla jądra gaussowskiego wyniosła $0.9146$ (min: $0.9088$, max: $0.9250$).
 
 Jądra trójkątne, epańczykowa i jednostkowe wykazały prawie taką samą dokładność na całym zakresie $sigma$, co może być spowodowane ich podobną charakterystyką (zob. _#ref(<PorownanieJader>)_). Najlepszy wynik z tych trzech funkcji uzyskało jądro trójkątne, które osiągnęło dokładność $0.8213$ przy $sigma approx 2$. Co jest znacznie gorszym wynikiem niż jądra gaussowskie i laplasjańskie.
 
