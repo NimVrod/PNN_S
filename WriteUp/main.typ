@@ -162,6 +162,7 @@ klasy, a $j$ -- numer wzorca w obrębie tej klasy.
 Dla danego wektora wejściowego $bold(x)$ neuron oblicza odległość euklidesową między
 wejściem a zapamiętanym wzorcem, a następnie przetwarza ją przez funkcję jądra
 #cite(<specht1990pnn>). Domyślnie stosuje się jądro Gaussa (zob. @kernel):
+// TODO: Może podmienic phi na K(x, x_(k j)) żeby było bardziej intuicyjnie
 
 $ phi_(k j)(bold(x)) = frac(1, sigma sqrt(2 pi)) exp lr(( -frac(||bold(x) - bold(x)_(k j)||^2, 2 sigma^2) )) $
 
@@ -184,9 +185,11 @@ Każdy neuron sumujący agreguje wyjścia neuronów wzorcowych należących do t
 
 $ S_k (bold(x)) = sum_(j=1)^(N_k) phi_(k j)(bold(x)) $
 
-//TODO: może to lepiej napisać niż haiku
-gdzie $N_k$ to liczba wzorców treningowych klasy $k$. Wynik $S_k$ jest proporcjonalny
-do estymowanej gęstości prawdopodobieństwa klasy $k$, $phi$ to funkcja jądra (zob. #ref(<kernel>)), a $bold(x)$ to wektor cech obserwacji.
+//TODO: Może zmienić na $S_k (bold(x)) = frac(1, N_k) sum_(j=1)^(N_k) phi_(k j)(bold(x))$ żeby było bardziej intuicyjnie
+gdzie:
+- $S_k (bold(x))$ -- wynik działania neuronu sumującego dla klasy $k$,
+- $N_k$ -- liczba wzorców treningowych należących do klasy $k$,
+- $phi_(k j)(bold(x))$ -- wyjście neuronu wzorcowego dla wzorca $j$ w klasie $k$. (Funkcja jądra obliczona w warstwie wzorców).
 
 === Warstwa wyjściowa (Output Layer)
 
@@ -361,7 +364,7 @@ Zbiór nie zawiera brakujących wartości, a cechy są numeryczne, co ułatwia i
 )
 Dane pobierane są z pliku `.data`. Wszystkie cechy poza ostatnią są zwracane jako macierz z wymiarami $N times p$, gdzie $N$ to liczba próbek, a $p$ to liczba cech (57). Ostatnia kolumna zawiera etykiety klas (0 lub 1) i jest zwracana jako wektor o długości $N$.
 
-Dane przed przetwarzaniem są normalizowane, ponieważ cechy zbioru danych mają różne zakresy wartości (częstość występowania słów to zakres od $0$ do $1$, natomiast  długość wiadomości to zakres od $0$ do $10000$).
+Dane przed przetwarzaniem są normalizowane, ponieważ cechy zbioru danych mają różne zakresy wartości (częstość występowania słów to zakres od $0$ do $100$, natomiast  długość wiadomości to zakres od $0$ do $10000$).
 Jeżeli nie przeprowadzimy normalizacji, odległości euklidesowe obliczane przez PNN będą zdominowane przez cechy o większych zakresach, co może prowadzić do błędnych klasyfikacji. Normalizacja zapewnia, że wszystkie cechy mają równy wpływ na estymację gęstości i poprawia wydajność modelu.
 
 #figure(
@@ -470,7 +473,7 @@ Metoda ```py def predict()``` jest pomocniczą funkcją, która umożliwia przew
   kind: raw,
   placement: none,
 )
-Każda metoda z ```py class PNNKernels``` implementuje inną funkcję jądra, która jest używana do obliczania podobieństwa między wektorem wejściowym a wzorcami treningowymi. W eksperymentach porównujemy różne funkcje jądra, aby zobaczyć, jak wpływają one na dokładność klasyfikacji.
+Każda metoda z ```py class PNNKernels``` implementuje inną funkcję jądra, która jest używana do obliczania podobieństwa między wektorem wejściowym a wzorcami treningowymi.
 Każda funkcja jądra jest zaimplementowana w osobnej metodzie klasy ```py class PnnKernels```, co pozwala na łatwe dodawanie nowych funkcji jądra i eksperymentowanie z różnymi konfiguracjami. W każdej z tych funkcji korzystamy z `numpy` #cite(<numpydocs>) aby przyśpieszyć obliczenia i umożliwić efektywne przetwarzanie dużych zbiorów danych.
 
 Pełny kod projektu dostępny jest w _#link(<Dodatki>, [dodatkach])_
