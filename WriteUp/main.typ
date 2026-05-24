@@ -599,6 +599,7 @@ Ponownie najlepszą dokładność osiągnęło jądro laplasjańskie. Dokładno�
 $Delta = 0.9244 - 0.9141 = 0.0103$, więc różnica jest niewielka, co potwierdza, że reguła Silvermana jest użytecznym narzędziem do oszacowania początkowej wartości $sigma$, która następnie może być dostrojona za pomocą walidacji krzyżowej.
 
 == Badanie wpływu stałej normalizującej w funkcjach jądra
+//TODO: Napisać lepiej niż LLM
 W prawie każdej definicji funkcji jądra uwzględnione są stałe normalizujące, które zapewniają, że jądro jest poprawnie znormalizowane jako estymator gęstości.
 Na przykład dla jądra gaussowskiego, stała normalizująca to $frac(1, sigma sqrt(2 pi))$.
 Jednak w kontekście klasyfikacji, gdzie ostateczna decyzja opiera się na maksymalnej wartości estymowanej gęstości, te stałe nie powinny wpływać na wynik klasyfikacji, ponieważ są one takie same dla wszystkich klas i nie zmieniają relatywnych wartości estymowanych gęstości.
