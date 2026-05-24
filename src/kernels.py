@@ -63,5 +63,4 @@ class PnnKernels:
             raise ValueError("h must be > 0")
 
         l2_dist = np.linalg.norm(x - y, axis=1)
-        norm_const = 1.0 / (2.0 * h)
-        return norm_const * (l2_dist <= h).astype(float)
+        return np.where(l2_dist <= h, 0.5, 0.0)

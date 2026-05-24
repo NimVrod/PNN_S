@@ -13,8 +13,8 @@ from src.pnn import PNN
 
 def load_data(path: str) -> tuple[np.ndarray, np.ndarray]:
     """
-    Load data from a CSV file. The last column is assumed to be the class label.
-    :param path: Path to the CSV file containing the data.
+    Load data from a spambase-style .data file. The last column is the class label.
+    :param path: Path to the .data file containing the data.
     :return: A tuple containing the features (X) and labels (y) as numpy arrays.
     """
     data = np.loadtxt(path, delimiter=",")
@@ -31,6 +31,7 @@ def normalize_data(x: np.ndarray) -> np.ndarray:
     """
     mean = np.mean(x, axis=0)
     std = np.std(x, axis=0)
+    std = np.where(std == 0, 1.0, std)
     return (x - mean) / std
 
 
@@ -51,24 +52,23 @@ def main():
         PnnKernels.triangular_kernel,
         PnnKernels.uniform_kernel,
     ]
-    silverman_accuracy: dict[
-        str, float
-    ] = {}  # {kernel_name: accuracy} for Silverman's rule of thumb evaluation
+    silverman_accuracy: dict[str, list[float]] = {}
     kf = KFold(n_splits=5, shuffle=True, random_state=67)
+    for kernel in kerns:
+        silverman_accuracy[kernel.__name__] = []
     for train_index, test_index in kf.split(x):
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
         p.fit(x_train, y_train)
         for kernel in kerns:
             p.kernel = kernel
-            y_pred = p.predict(x_test) 
-            accuracy = np.mean(y_pred == y_test)
-            silverman_accuracy[kernel.__name__] = accuracy
+            y_pred = p.predict(x_test)
+            silverman_accuracy[kernel.__name__].append(np.mean(y_pred == y_test))
     print("Silverman's rule of thumb accuracies:")
-    for kernel_name, acc in silverman_accuracy.items():
-        print(f"Kernel: {kernel_name}, Accuracy: {acc:.4f}")
+    for kernel_name, fold_accs in silverman_accuracy.items():
+        print(f"Kernel: {kernel_name}, Accuracy: {np.mean(fold_accs):.4f}")
     # Best sigma and kernel search using K-Fold Cross-Validation
-    accuracies = kFold_search(x, y, kerns=kerns, max_sigma=1, diff_sigma=0.5)
+    accuracies = kFold_search(x, y, kerns=kerns, max_sigma=2, diff_sigma=0.005)
 
     # Find best kernel/sigma by mean fold accuracy
     best_kernel, best_sigma, best_stats = max(
