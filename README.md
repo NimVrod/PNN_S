@@ -1,7 +1,7 @@
 # PNN_S
 Probablistic neural network implementation in Python, with a write-up in Typst. The project includes data preprocessing, model training, and evaluation on the Spambase dataset. The write-up covers the methodology, results, and conclusions drawn from the experiments.
 
-The write up (in polish) is available in the `WriteUp` directory.
+The write up in polish is available in the `WriteUp` directory.
 
 # Requirements
 - Python 3.14
